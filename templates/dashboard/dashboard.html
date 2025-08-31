@@ -1,0 +1,766 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ brand_name }} - Digital Marketing Dashboard{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin: -1.5rem -15px 2rem -15px;
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .metric-label {
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .widget {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .widget-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .platform-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .platform-card {
+        padding: 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .platform-card.active {
+        border-color: #28a745;
+        background-color: #f8fff8;
+    }
+    
+    .platform-card.inactive {
+        border-color: #dc3545;
+        background-color: #fff5f5;
+    }
+    
+    .swot-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .swot-item {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .swot-strengths { background-color: #d4edda; border-left: 4px solid #28a745; }
+    .swot-weaknesses { background-color: #f8d7da; border-left: 4px solid #dc3545; }
+    .swot-opportunities { background-color: #cce7ff; border-left: 4px solid #007bff; }
+    .swot-threats { background-color: #fff3cd; border-left: 4px solid #ffc107; }
+    
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .kpi-item {
+        text-align: center;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .kpi-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .list-item {
+        background-color: #f8f9fa;
+        padding: 0.5rem;
+        margin: 0.25rem 0;
+        border-radius: 4px;
+        border-left: 3px solid #667eea;
+    }
+    
+    .nav-tabs {
+        border: none;
+        margin-bottom: 2rem;
+    }
+    
+    .nav-tabs .nav-link {
+        border: none;
+        background-color: #f8f9fa;
+        color: #666;
+        margin-right: 0.5rem;
+        border-radius: 8px;
+    }
+    
+    .nav-tabs .nav-link.active {
+        background-color: #667eea;
+        color: white;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    /* Content Progress Dark Theme */
+    :root {
+        --bg-primary: #0a0e27;
+        --bg-secondary: #1a1f3a;
+        --bg-card: #1e2340;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b6d3;
+        --text-muted: #6b7093;
+        --accent-primary: #00d4ff;
+        --accent-success: #00e676;
+        --accent-warning: #ff9800;
+        --accent-danger: #ff5252;
+        --border-color: #2d3247;
+        --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+    
+    .content-progress-section {
+        background: var(--bg-primary);
+        padding: 2rem;
+        border-radius: 12px;
+        margin: -1rem;
+    }
+    
+    .progress-header {
+        background: var(--bg-secondary);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+    }
+    
+    .progress-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .progress-metric-card {
+        background: var(--bg-card);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        transition: transform 0.3s ease;
+    }
+    
+    .progress-metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px var(--shadow-color);
+    }
+    
+    .progress-metric-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .progress-metric-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    
+    .progress-metric-value.committed { color: var(--accent-primary); }
+    .progress-metric-value.drafted { color: var(--accent-warning); }
+    .progress-metric-value.published { color: var(--accent-success); }
+    
+    .content-pipeline {
+        background: var(--bg-secondary);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+    }
+    
+    .pipeline-stages {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+    }
+    
+    .pipeline-stage {
+        flex: 1;
+        text-align: center;
+        padding: 1rem;
+        position: relative;
+    }
+    
+    .pipeline-stage:not(:last-child)::after {
+        content: '→';
+        position: absolute;
+        right: -1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--accent-primary);
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .stage-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin: 0 auto 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .stage-committed { background: var(--accent-primary); color: white; }
+    .stage-drafted { background: var(--accent-warning); color: white; }
+    .stage-published { background: var(--accent-success); color: white; }
+    
+    .platform-grid-enhanced {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .platform-card-enhanced {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .platform-card-enhanced:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px var(--shadow-color);
+        border-color: var(--accent-primary);
+    }
+    
+    .platform-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .platform-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .platform-status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+    
+    .status-active { background: var(--accent-success); color: white; }
+    .status-inactive { background: var(--accent-danger); color: white; }
+    .status-not-available { background: var(--accent-warning); color: white; }
+    
+    .platform-category {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+    
+    .progress-bar-enhanced {
+        background: var(--bg-primary);
+        height: 8px;
+        border-radius: 4px;
+        margin: 1rem 0;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-success));
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+    
+    .progress-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+    
+    .content-links-section {
+        border-top: 1px solid var(--border-color);
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .content-link-btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: var(--accent-primary);
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        margin: 0.25rem 0.25rem 0.25rem 0;
+        transition: all 0.3s ease;
+    }
+    
+    .content-link-btn:hover {
+        background: var(--accent-success);
+        transform: translateY(-1px);
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <h1>{{ brand_name }} - Digital Marketing Strategy Dashboard</h1>
+        <p class="mb-0">Comprehensive overview of your digital presence and marketing performance</p>
+    </div>
+</div>
+
+<!-- Key Metrics -->
+<div class="row">
+    <div class="col-md-2">
+        <div class="metric-card">
+            <div class="metric-value">{{ metrics.total_platforms }}</div>
+            <div class="metric-label">Total Platforms</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="metric-card">
+            <div class="metric-value">{{ metrics.active_platforms }}</div>
+            <div class="metric-label">Active Platforms</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="metric-card">
+            <div class="metric-value" style="color: #00d4ff;">{{ platform_progress.total_committed }}</div>
+            <div class="metric-label">Content Committed</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="metric-card">
+            <div class="metric-value" style="color: #ff9800;">{{ platform_progress.total_drafted }}</div>
+            <div class="metric-label">Total Drafted</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="metric-card">
+            <div class="metric-value" style="color: #00e676;">{{ platform_progress.total_published }}</div>
+            <div class="metric-label">Published</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="metric-card">
+            <div class="metric-value">{{ platform_progress.completion_rate }}%</div>
+            <div class="metric-label">Completion Rate</div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation Tabs -->
+<ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" data-tab="overview">Overview</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="platforms">Platform Performance</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="analytics">Analytics & KPIs</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="strategy">Strategy & SWOT</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="intelligence">Business Intelligence</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="content-progress">Content Progress</button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+
+<!-- Overview Tab -->
+<div id="overview" class="tab-content active">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="widget">
+                <h3 class="widget-title">Brand Overview</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Vision</h5>
+                        <p>{{ profile.brand_vision }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Mission</h5>
+                        <p>{{ profile.brand_mission }}</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h5>Core Values</h5>
+                    <p>{{ profile.brand_core_values }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="widget">
+                <h3 class="widget-title">Quick Links</h3>
+                {% if profile.brand_website %}
+                    <a href="{{ profile.brand_website }}" target="_blank" class="btn btn-outline-primary btn-sm d-block mb-2">Brand Website</a>
+                {% endif %}
+                {% if profile.website_blogs %}
+                    <a href="{{ profile.website_blogs }}" target="_blank" class="btn btn-outline-primary btn-sm d-block mb-2">Blog</a>
+                {% endif %}
+                {% if profile.brand_visual_verbal_dna_guidelines %}
+                    <a href="{{ profile.brand_visual_verbal_dna_guidelines }}" target="_blank" class="btn btn-outline-primary btn-sm d-block mb-2">Brand Guidelines</a>
+                {% endif %}
+            </div>
+            <div class="widget">
+                <h3 class="widget-title">Contact Information</h3>
+                <p><strong>Primary Contact:</strong><br>
+                {{ profile.primary_contact_first_name }} {{ profile.primary_contact_last_name }}<br>
+                {{ profile.primary_official_email }}<br>
+                {{ profile.primary_phone_number }}</p>
+                
+                {% if profile.secondary_contact_first_name %}
+                <p><strong>Secondary Contact:</strong><br>
+                {{ profile.secondary_contact_first_name }} {{ profile.secondary_contact_last_name }}<br>
+                {{ profile.secondary_official_email }}<br>
+                {{ profile.secondary_phone_number }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Platform Performance Tab -->
+<div id="platforms" class="tab-content">
+    <div class="widget">
+        <h3 class="widget-title">Social Media Platforms</h3>
+        <div class="platform-grid">
+            {% for platform in social_platforms %}
+            <div class="platform-card {{ platform.status }}">
+                <h5>{{ platform.name }}</h5>
+                <p class="mb-1">
+                    <span class="badge {% if platform.status == 'active' %}bg-success{% else %}bg-danger{% endif %}">
+                        {{ platform.status|title }}
+                    </span>
+                </p>
+                {% if platform.url %}
+                    <a href="{{ platform.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Visit</a>
+                {% else %}
+                    <span class="text-muted">Not configured</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Analytics & KPIs Tab -->
+<div id="analytics" class="tab-content">
+    <div class="widget">
+        <h3 class="widget-title">Current Performance KPIs</h3>
+        <div class="kpi-grid">
+            <div class="kpi-item">
+                <div class="kpi-value">{{ metrics.website_traffic }}</div>
+                <div>Website Traffic</div>
+            </div>
+            <div class="kpi-item">
+                <div class="kpi-value">{{ metrics.instagram_reach }}</div>
+                <div>Instagram Reach</div>
+            </div>
+            <div class="kpi-item">
+                <div class="kpi-value">{{ kpis.google_rank|default:"N/A" }}</div>
+                <div>Google SEPR Rank</div>
+            </div>
+            <div class="kpi-item">
+                <div class="kpi-value">{{ metrics.review_rating }}</div>
+                <div>Review Rating</div>
+            </div>
+            <div class="kpi-item">
+                <div class="kpi-value">{{ metrics.posts_per_week }}</div>
+                <div>Posts Per Week</div>
+            </div>
+            <div class="kpi-item">
+                <div class="kpi-value">{{ metrics.videos_per_week }}</div>
+                <div>Videos Per Week</div>
+            </div>
+            <div class="kpi-item">
+                <div class="kpi-value">{{ metrics.shorts_per_week }}</div>
+                <div>Shorts Per Week</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Strategy & SWOT Tab -->
+<div id="strategy" class="tab-content">
+    <div class="widget">
+        <h3 class="widget-title">SWOT Analysis</h3>
+        <div class="swot-grid">
+            <div>
+                <div class="swot-item swot-strengths">
+                    <h5>Strengths</h5>
+                    {% for strength in swot.strengths %}
+                        <div class="list-item">{{ strength }}</div>
+                    {% empty %}
+                        <p class="text-muted">No strengths listed</p>
+                    {% endfor %}
+                </div>
+                
+                <div class="swot-item swot-opportunities">
+                    <h5>Opportunities</h5>
+                    {% for opportunity in swot.opportunities %}
+                        <div class="list-item">{{ opportunity }}</div>
+                    {% empty %}
+                        <p class="text-muted">No opportunities listed</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div>
+                <div class="swot-item swot-weaknesses">
+                    <h5>Weaknesses</h5>
+                    {% for weakness in swot.weaknesses %}
+                        <div class="list-item">{{ weakness }}</div>
+                    {% empty %}
+                        <p class="text-muted">No weaknesses listed</p>
+                    {% endfor %}
+                </div>
+                
+                <div class="swot-item swot-threats">
+                    <h5>Threats</h5>
+                    {% for threat in swot.threats %}
+                        <div class="list-item">{{ threat }}</div>
+                    {% empty %}
+                        <p class="text-muted">No threats listed</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Business Intelligence Tab -->
+<div id="intelligence" class="tab-content">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="widget">
+                <h3 class="widget-title">Top Partners</h3>
+                {% for partner in business_intel.partners %}
+                    <div class="list-item">{{ partner }}</div>
+                {% empty %}
+                    <p class="text-muted">No partners listed</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="widget">
+                <h3 class="widget-title">Top Competitors</h3>
+                {% for competitor in business_intel.competitors %}
+                    <div class="list-item">{{ competitor }}</div>
+                {% empty %}
+                    <p class="text-muted">No competitors listed</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    {% if business_intel.notes %}
+    <div class="widget">
+        <h3 class="widget-title">Additional Notes</h3>
+        <p>{{ business_intel.notes }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Content Progress Tab -->
+<div id="content-progress" class="tab-content">
+    <div class="content-progress-section">
+        <!-- Progress Header with Metrics -->
+        <div class="progress-header">
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Content Progress Dashboard</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Track your content pipeline across all platforms</p>
+            
+            {% if platform_progress.platforms %}
+            <div class="progress-metrics">
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Total Committed</div>
+                    <div class="progress-metric-value committed">{{ platform_progress.total_committed }}</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Total Drafted</div>
+                    <div class="progress-metric-value drafted">{{ platform_progress.total_drafted }}</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Total Published</div>
+                    <div class="progress-metric-value published">{{ platform_progress.total_published }}</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Completion Rate</div>
+                    <div class="progress-metric-value">{{ platform_progress.completion_rate }}%</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if platform_progress.platforms %}
+            <!-- Content Pipeline Visualization -->
+            <div class="content-pipeline">
+                <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">Content Workflow Pipeline</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 0; font-size: 0.9rem;">Your content journey from commitment to publication</p>
+                
+                <div class="pipeline-stages">
+                    <div class="pipeline-stage">
+                        <div class="stage-circle stage-committed">{{ platform_progress.total_committed }}</div>
+                        <div style="color: var(--text-primary); font-weight: 500;">Committed</div>
+                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Content promised</div>
+                    </div>
+                    <div class="pipeline-stage">
+                        <div class="stage-circle stage-drafted">{{ platform_progress.total_drafted }}</div>
+                        <div style="color: var(--text-primary); font-weight: 500;">Drafted</div>
+                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Work in progress</div>
+                    </div>
+                    <div class="pipeline-stage">
+                        <div class="stage-circle stage-published">{{ platform_progress.total_published }}</div>
+                        <div style="color: var(--text-primary); font-weight: 500;">Published</div>
+                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Live content</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Platform Grid -->
+            <div class="platform-grid-enhanced">
+                {% for progress in platform_progress.platforms %}
+                <div class="platform-card-enhanced">
+                    <div class="platform-header">
+                        <div class="platform-name">{{ progress.get_platform_display }}</div>
+                        <div class="platform-status-badge {% if progress.committed > 0 %}status-active{% else %}status-inactive{% endif %}">
+                            {% if progress.committed > 0 %}Active{% else %}Planned{% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="platform-category">
+                        {% if progress.platform == 'website_blogs' %}Professional Writing
+                        {% elif progress.platform == 'instagram' or progress.platform == 'pinterest' %}Visual Content
+                        {% elif progress.platform == 'linkedin' %}Professional Network
+                        {% elif progress.platform == 'youtube' or progress.platform == 'tiktok' %}Video Content
+                        {% elif progress.platform == 'twitter' or progress.platform == 'threads' %}Real-Time Social
+                        {% elif progress.platform == 'facebook' %}Social Community
+                        {% elif progress.platform == 'medium' %}Professional Writing
+                        {% elif progress.platform == 'email_marketing' %}Direct Marketing
+                        {% else %}Digital Platform
+                        {% endif %}
+                    </div>
+                    
+                    <div class="progress-stats">
+                        <span>Committed: <strong style="color: var(--accent-primary);">{{ progress.committed }}</strong></span>
+                        <span>Drafted: <strong style="color: var(--accent-warning);">{{ progress.drafted }}</strong></span>
+                        <span>Published: <strong style="color: var(--accent-success);">{{ progress.published }}</strong></span>
+                    </div>
+                    
+                    <div class="progress-bar-enhanced">
+                        <div class="progress-fill" style="width: {{ progress.completion_percentage }}%;"></div>
+                    </div>
+                    
+                    <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+                        {{ progress.completion_percentage }}% Complete
+                    </div>
+                    
+                    {% if progress.content_links.all %}
+                    <div class="content-links-section">
+                        <div style="color: var(--text-primary); font-weight: 500; margin-bottom: 0.5rem; font-size: 0.9rem;">Content Resources:</div>
+                        {% for link in progress.content_links.all %}
+                            <a href="{{ link.url }}" target="_blank" class="content-link-btn">{{ link.title }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; text-align: center; border: 1px solid var(--border-color);">
+                <h5 style="color: var(--accent-primary); margin-bottom: 1rem;">Content Strategy Being Prepared</h5>
+                <p style="color: var(--text-secondary); margin-bottom: 0;">Our team is currently setting up your personalized content strategy based on your onboarding information. You'll see your platform progress here once it's ready.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Tab functionality
+document.querySelectorAll('.nav-link').forEach(tab => {
+    tab.addEventListener('click', function() {
+        // Remove active class from all tabs and content
+        document.querySelectorAll('.nav-link').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        this.classList.add('active');
+        
+        // Show corresponding content
+        const tabId = this.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+    });
+});
+</script>
+{% endblock %}
+

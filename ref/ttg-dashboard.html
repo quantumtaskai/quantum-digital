@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTG - Digital Marketing Strategy Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="brand-title">TTG - Digital Marketing Strategy Dashboard</h1>
+            <div class="header-metrics">
+                <div class="metric-card">
+                    <span class="metric-label">Total Platforms</span>
+                    <span class="metric-value" id="totalPlatforms">22</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Active</span>
+                    <span class="metric-value active" id="activePlatforms">2</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Content Committed</span>
+                    <span class="metric-value" id="totalContent">811</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Total Drafted</span>
+                    <span class="metric-value" id="totalDrafted">39</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="platforms">Platform Performance</button>
+        <button class="tab-btn" data-tab="hashtags">Hashtag Strategy</button>
+        <button class="tab-btn" data-tab="competitors">Competitive Intelligence</button>
+        <button class="tab-btn" data-tab="recommendations">Recommendations</button>
+    </nav>
+
+    <!-- Main Dashboard Content -->
+    <main class="dashboard">
+        
+        <!-- Platform Performance Tab -->
+        <section id="platforms" class="tab-content active">
+            <div class="dashboard-grid">
+                <!-- Platform Status Overview -->
+                <div class="widget large">
+                    <h3 class="widget-title">Platform Status Overview</h3>
+                    <div class="chart-container">
+                        <canvas id="platformStatusChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Content Pipeline -->
+                <div class="widget large">
+                    <h3 class="widget-title">Content Pipeline</h3>
+                    <div class="content-pipeline" id="contentPipeline">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Platform Grid -->
+                <div class="widget full-width">
+                    <h3 class="widget-title">Platform Details</h3>
+                    <div class="platform-grid" id="platformGrid">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hashtag Strategy Tab -->
+        <section id="hashtags" class="tab-content">
+            <div class="dashboard-grid">
+                <!-- Top Hashtags -->
+                <div class="widget large">
+                    <h3 class="widget-title">Top Performing Hashtags</h3>
+                    <div class="hashtag-list" id="topHashtags">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Category Breakdown -->
+                <div class="widget medium">
+                    <h3 class="widget-title">Hashtag Categories</h3>
+                    <div class="chart-container">
+                        <canvas id="hashtagCategoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Posting Schedule -->
+                <div class="widget large">
+                    <h3 class="widget-title">Optimal Posting Times</h3>
+                    <div class="schedule-grid" id="scheduleGrid">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Platform Suitability -->
+                <div class="widget full-width">
+                    <h3 class="widget-title">Platform Suitability Matrix</h3>
+                    <div class="suitability-matrix" id="suitabilityMatrix">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Competitive Intelligence Tab -->
+        <section id="competitors" class="tab-content">
+            <div class="dashboard-grid">
+                <!-- Market Position -->
+                <div class="widget large">
+                    <h3 class="widget-title">Market Position</h3>
+                    <div class="competitor-comparison" id="competitorComparison">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Gap Analysis -->
+                <div class="widget medium">
+                    <h3 class="widget-title">Platform Gap Analysis</h3>
+                    <div class="gap-analysis" id="gapAnalysis">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Competitor List -->
+                <div class="widget large">
+                    <h3 class="widget-title">Competitor Benchmarks</h3>
+                    <div class="competitor-list" id="competitorList">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recommendations Tab -->
+        <section id="recommendations" class="tab-content">
+            <div class="dashboard-grid">
+                <!-- High Priority Platforms -->
+                <div class="widget large">
+                    <h3 class="widget-title">High-Priority Platform Opportunities</h3>
+                    <div class="recommendation-list" id="priorityPlatforms">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Underutilized Hashtags -->
+                <div class="widget large">
+                    <h3 class="widget-title">High-Potential Hashtags</h3>
+                    <div class="recommendation-list" id="potentialHashtags">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Content Gaps -->
+                <div class="widget medium">
+                    <h3 class="widget-title">Content Strategy Gaps</h3>
+                    <div class="gap-list" id="contentGaps">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Action Items -->
+                <div class="widget medium">
+                    <h3 class="widget-title">Immediate Actions</h3>
+                    <div class="action-items" id="actionItems">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Search and Filter Bar -->
+    <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="Search platforms, hashtags, or competitors...">
+        <select id="filterSelect">
+            <option value="">All Categories</option>
+            <option value="active">Active Platforms</option>
+            <option value="inactive">Inactive Platforms</option>
+            <option value="high-score">High Score Hashtags (8-10)</option>
+            <option value="trending">Trending Content</option>
+        </select>
+    </div>
+
+    <script src="ttg-data.js"></script>
+    <script src="ttg-dashboard.js"></script>
+</body>
+</html>
