@@ -6,18 +6,6 @@ class BrandProfileForm(forms.ModelForm):
     class Meta:
         model = BrandProfile
         exclude = ['user', 'created_at', 'updated_at']
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Prefill required fields for testing
-        self.fields['brand_name'].initial = 'Test Brand Co.'
-        self.fields['primary_contact_first_name'].initial = 'John'
-        self.fields['primary_contact_last_name'].initial = 'Doe'
-        self.fields['primary_official_email'].initial = 'john@testbrand.com'
-        self.fields['primary_phone_number'].initial = '(555) 123-4567'
-        self.fields['brand_vision'].initial = 'To revolutionize digital branding through innovative solutions.'
-        self.fields['brand_mission'].initial = 'We empower brands to connect with their audience through meaningful digital experiences.'
-        self.fields['brand_core_values'].initial = 'Innovation, Quality, Customer Focus, Integrity'
         widgets = {
             'brand_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your brand name'}),
             'primary_contact_first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
@@ -66,3 +54,6 @@ class BrandProfileForm(forms.ModelForm):
             'top_10_competitors': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'List your top 10 competitors (one per line)'}),
             'additional_notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Any additional information worth mentioning...'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

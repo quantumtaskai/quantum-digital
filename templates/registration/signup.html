@@ -2,41 +2,319 @@
 
 {% block title %}Sign Up{% endblock %}
 
+{% block extra_css %}
+<style>
+    .signup-container {
+        min-height: calc(100vh - var(--nav-height));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+
+    .signup-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px var(--shadow-color);
+        overflow: hidden;
+        width: 100%;
+        max-width: 500px;
+        backdrop-filter: blur(10px);
+    }
+
+    .signup-header {
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+        padding: 2.5rem 2rem 2rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .signup-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 230, 118, 0.1) 0%, transparent 70%);
+        animation: rotate 12s linear infinite;
+    }
+
+    .signup-header h2 {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .signup-header p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .signup-body {
+        padding: 2rem;
+    }
+
+    .form-group-signup {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .form-label-signup {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        display: block;
+    }
+
+    .form-control-signup {
+        background: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .form-control-signup:focus {
+        background: var(--bg-primary);
+        border-color: var(--accent-success);
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(0, 230, 118, 0.15), 0 0 20px rgba(0, 230, 118, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-control-signup:hover {
+        border-color: rgba(0, 230, 118, 0.5);
+    }
+
+    .form-control-signup::placeholder {
+        color: var(--text-muted);
+        opacity: 0.8;
+    }
+
+    .error-message-signup {
+        color: var(--accent-danger);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        line-height: 1.4;
+    }
+
+    .btn-signup-primary {
+        background: linear-gradient(135deg, var(--accent-success), var(--accent-primary));
+        border: none;
+        color: white;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        border-radius: 12px;
+        width: 100%;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-signup-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-signup-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-signup-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 230, 118, 0.3);
+    }
+
+    .btn-signup-secondary {
+        background: none;
+        border: 2px solid var(--border-color);
+        color: var(--text-secondary);
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border-radius: 12px;
+        width: 100%;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-signup-secondary:hover {
+        border-color: var(--accent-primary);
+        color: var(--accent-primary);
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .signup-footer {
+        text-align: center;
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--border-color);
+        background: rgba(26, 31, 58, 0.3);
+    }
+
+    .welcome-icon-signup {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .password-strength {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .strength-indicator {
+        height: 4px;
+        width: 60px;
+        border-radius: 2px;
+        background: var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .strength-weak { background: var(--accent-danger); }
+    .strength-medium { background: var(--accent-warning); }
+    .strength-strong { background: var(--accent-success); }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    @media (max-width: 768px) {
+        .signup-container {
+            padding: 1rem;
+        }
+
+        .signup-header {
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+        }
+
+        .signup-header h2 {
+            font-size: 1.7rem;
+        }
+
+        .signup-body {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h3>Create Account</h3>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <div class="text-danger">{{ form.email.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
-                        {{ form.password1 }}
-                        {% if form.password1.errors %}
-                            <div class="text-danger">{{ form.password1.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
-                        {{ form.password2 }}
-                        {% if form.password2.errors %}
-                            <div class="text-danger">{{ form.password2.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <button type="submit" class="btn btn-primary">Sign Up</button>
-                    <a href="{% url 'accounts:login' %}" class="btn btn-link">Already have an account? Login</a>
-                </form>
-            </div>
+<div class="signup-container">
+    <div class="signup-card">
+        <div class="signup-header">
+            <span class="welcome-icon-signup">✨</span>
+            <h2>Join QuantumTask Digital Branding</h2>
+            <p>Create your account to get started</p>
+        </div>
+        
+        <div class="signup-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                <div class="form-group-signup">
+                    <label for="{{ form.email.id_for_label }}" class="form-label-signup">Email Address</label>
+                    <input type="email" 
+                           id="{{ form.email.id_for_label }}" 
+                           name="{{ form.email.name }}"
+                           class="form-control-signup" 
+                           placeholder="Enter your email address"
+                           value="{{ form.email.value|default:'' }}"
+                           required>
+                    {% if form.email.errors %}
+                        <div class="error-message-signup">
+                            <span>⚠️</span>
+                            <span>{{ form.email.errors.0 }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group-signup">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label-signup">Password</label>
+                    <input type="password" 
+                           id="{{ form.password1.id_for_label }}" 
+                           name="{{ form.password1.name }}"
+                           class="form-control-signup" 
+                           placeholder="Create a strong password"
+                           required>
+                    {% if form.password1.errors %}
+                        <div class="error-message-signup">
+                            <span>⚠️</span>
+                            <div>
+                                {% for error in form.password1.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group-signup">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label-signup">Confirm Password</label>
+                    <input type="password" 
+                           id="{{ form.password2.id_for_label }}" 
+                           name="{{ form.password2.name }}"
+                           class="form-control-signup" 
+                           placeholder="Confirm your password"
+                           required>
+                    {% if form.password2.errors %}
+                        <div class="error-message-signup">
+                            <span>⚠️</span>
+                            <span>{{ form.password2.errors.0 }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn-signup-primary">
+                    Create Account
+                </button>
+            </form>
+        </div>
+
+        <div class="signup-footer">
+            <a href="{% url 'accounts:login' %}" class="btn-signup-secondary">
+                Already have an account? Sign in
+            </a>
         </div>
     </div>
 </div>
