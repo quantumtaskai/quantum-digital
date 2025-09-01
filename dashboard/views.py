@@ -57,22 +57,23 @@ def calculate_metrics(profile):
 def get_social_platforms(profile):
     """Get social media platforms data"""
     platforms = [
-        {'name': 'Instagram', 'url': profile.instagram, 'icon': 'instagram'},
-        {'name': 'Facebook', 'url': profile.facebook, 'icon': 'facebook'},
-        {'name': 'Twitter/X', 'url': profile.twitter, 'icon': 'twitter'},
-        {'name': 'LinkedIn', 'url': profile.linkedin, 'icon': 'linkedin'},
-        {'name': 'TikTok', 'url': profile.tiktok, 'icon': 'tiktok'},
-        {'name': 'YouTube', 'url': profile.youtube, 'icon': 'youtube'},
-        {'name': 'Pinterest', 'url': profile.pinterest, 'icon': 'pinterest'},
-        {'name': 'Snapchat', 'url': profile.snapchat, 'icon': 'snapchat'},
-        {'name': 'Telegram', 'url': profile.telegram, 'icon': 'telegram'},
-        {'name': 'Medium', 'url': profile.medium, 'icon': 'medium'},
-        {'name': 'Quora', 'url': profile.quora, 'icon': 'quora'},
-        {'name': 'Reddit', 'url': profile.reddit, 'icon': 'reddit'},
-        {'name': 'Tumblr', 'url': profile.tumblr, 'icon': 'tumblr'},
-        {'name': 'Threads', 'url': profile.threads, 'icon': 'threads'},
-        {'name': 'BlueSky', 'url': profile.bluesky, 'icon': 'bluesky'},
-        {'name': 'WhatsApp Business', 'url': profile.whatsapp_business, 'icon': 'whatsapp'},
+        {'name': 'Instagram', 'url': profile.instagram, 'icon': 'instagram', 'field_name': 'instagram'},
+        {'name': 'Facebook', 'url': profile.facebook, 'icon': 'facebook', 'field_name': 'facebook'},
+        {'name': 'Twitter/X', 'url': profile.twitter, 'icon': 'twitter', 'field_name': 'twitter'},
+        {'name': 'LinkedIn', 'url': profile.linkedin, 'icon': 'linkedin', 'field_name': 'linkedin'},
+        {'name': 'TikTok', 'url': profile.tiktok, 'icon': 'tiktok', 'field_name': 'tiktok'},
+        {'name': 'YouTube', 'url': profile.youtube, 'icon': 'youtube', 'field_name': 'youtube'},
+        {'name': 'Pinterest', 'url': profile.pinterest, 'icon': 'pinterest', 'field_name': 'pinterest'},
+        {'name': 'Snapchat', 'url': profile.snapchat, 'icon': 'snapchat', 'field_name': 'snapchat'},
+        {'name': 'Telegram', 'url': profile.telegram, 'icon': 'telegram', 'field_name': 'telegram'},
+        {'name': 'Medium', 'url': profile.medium, 'icon': 'medium', 'field_name': 'medium'},
+        {'name': 'Quora', 'url': profile.quora, 'icon': 'quora', 'field_name': 'quora'},
+        {'name': 'Reddit', 'url': profile.reddit, 'icon': 'reddit', 'field_name': 'reddit'},
+        {'name': 'Tumblr', 'url': profile.tumblr, 'icon': 'tumblr', 'field_name': 'tumblr'},
+        {'name': 'Threads', 'url': profile.threads, 'icon': 'threads', 'field_name': 'threads'},
+        {'name': 'BlueSky', 'url': profile.bluesky, 'icon': 'bluesky', 'field_name': 'bluesky'},
+        {'name': 'WhatsApp Business', 'url': profile.whatsapp_business, 'icon': 'whatsapp', 'field_name': 'whatsapp_business'},
+        {'name': 'Website Blogs', 'url': profile.website_blogs, 'icon': 'globe', 'field_name': 'website_blogs'},
     ]
     
     for platform in platforms:
@@ -131,8 +132,12 @@ def get_platform_progress(user):
     total_published = sum(p.published for p in platform_progress)
     completion_rate = (total_published / total_committed * 100) if total_committed > 0 else 0
     
+    # Get list of platform names that have progress data
+    platform_names = list(platform_progress.values_list('platform', flat=True))
+    
     return {
         'platforms': platform_progress,
+        'platform_names': platform_names,
         'total_committed': total_committed,
         'total_drafted': total_drafted,
         'total_published': total_published,

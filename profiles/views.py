@@ -25,3 +25,23 @@ def onboarding_view(request):
         form = BrandProfileForm()
 
     return render(request, 'profiles/onboarding.html', {'form': form})
+
+
+@login_required
+def profile_edit_view(request):
+    try:
+        profile = BrandProfile.objects.get(user=request.user)
+    except BrandProfile.DoesNotExist:
+        messages.error(request, 'Please complete your onboarding first.')
+        return redirect('profiles:onboarding')
+
+    if request.method == 'POST':
+        form = BrandProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your brand profile has been updated successfully.')
+            return redirect('dashboard:dashboard')
+    else:
+        form = BrandProfileForm(instance=profile)
+
+    return render(request, 'profiles/profile_edit.html', {'form': form, 'profile': profile})

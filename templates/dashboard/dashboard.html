@@ -4,33 +4,103 @@
 
 {% block extra_css %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
     .dashboard-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2rem 0;
-        margin: -1.5rem -15px 2rem -15px;
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+        color: var(--text-primary);
+        padding: 3rem 0;
+        margin: -2rem -15px 2rem -15px;
+        border-radius: 0 0 20px 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 8px 25px var(--shadow-color);
+        position: relative;
+        overflow: hidden;
     }
     
-    .metric-card {
-        background: white;
-        border-radius: 8px;
-        padding: 1.5rem;
-        text-align: center;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+    
+    .dashboard-header h1, .dashboard-header p {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .dashboard-header h1 {
+        color: var(--accent-primary);
+        font-weight: 800;
+        text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
         margin-bottom: 1rem;
     }
     
+    .dashboard-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+    
+    .metric-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        box-shadow: 0 8px 25px var(--shadow-color);
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        height: 140px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-success));
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px var(--shadow-color);
+        border-color: var(--accent-primary);
+    }
+    
     .metric-value {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #667eea;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
     }
     
     .metric-label {
-        color: #666;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .metric-icon {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        opacity: 0.8;
     }
     
     .widget {
@@ -119,19 +189,58 @@
     .nav-tabs {
         border: none;
         margin-bottom: 2rem;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
     }
     
     .nav-tabs .nav-link {
         border: none;
-        background-color: #f8f9fa;
-        color: #666;
-        margin-right: 0.5rem;
-        border-radius: 8px;
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .nav-tabs .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+        transition: left 0.5s;
+    }
+    
+    .nav-tabs .nav-link:hover::before {
+        left: 100%;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        background: var(--bg-tertiary);
+        color: var(--accent-primary);
+        border-color: var(--accent-primary);
+        transform: translateY(-2px);
     }
     
     .nav-tabs .nav-link.active {
-        background-color: #667eea;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
         color: white;
+        border-color: var(--accent-primary);
+        box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
     }
     
     .tab-content {
@@ -370,41 +479,41 @@
     </div>
 </div>
 
-<!-- Key Metrics -->
-<div class="row">
-    <div class="col-md-2">
+<!-- Enhanced Key Metrics -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-2 col-lg-4 col-md-6">
         <div class="metric-card">
             <div class="metric-value">{{ metrics.total_platforms }}</div>
             <div class="metric-label">Total Platforms</div>
         </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-xl-2 col-lg-4 col-md-6">
         <div class="metric-card">
             <div class="metric-value">{{ metrics.active_platforms }}</div>
             <div class="metric-label">Active Platforms</div>
         </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-xl-2 col-lg-4 col-md-6">
         <div class="metric-card">
-            <div class="metric-value" style="color: #00d4ff;">{{ platform_progress.total_committed }}</div>
+            <div class="metric-value" style="color: var(--accent-primary); text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);">{{ platform_progress.total_committed }}</div>
             <div class="metric-label">Content Committed</div>
         </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-xl-2 col-lg-4 col-md-6">
         <div class="metric-card">
-            <div class="metric-value" style="color: #ff9800;">{{ platform_progress.total_drafted }}</div>
+            <div class="metric-value" style="color: var(--accent-warning); text-shadow: 0 0 20px rgba(255, 152, 0, 0.5);">{{ platform_progress.total_drafted }}</div>
             <div class="metric-label">Total Drafted</div>
         </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-xl-2 col-lg-4 col-md-6">
         <div class="metric-card">
-            <div class="metric-value" style="color: #00e676;">{{ platform_progress.total_published }}</div>
+            <div class="metric-value" style="color: var(--accent-success); text-shadow: 0 0 20px rgba(0, 230, 118, 0.5);">{{ platform_progress.total_published }}</div>
             <div class="metric-label">Published</div>
         </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-xl-2 col-lg-4 col-md-6">
         <div class="metric-card">
-            <div class="metric-value">{{ platform_progress.completion_rate }}%</div>
+            <div class="metric-value" style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{ platform_progress.completion_rate }}%</div>
             <div class="metric-label">Completion Rate</div>
         </div>
     </div>
@@ -436,74 +545,190 @@
 
 <!-- Overview Tab -->
 <div id="overview" class="tab-content active">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="widget">
-                <h3 class="widget-title">Brand Overview</h3>
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5>Vision</h5>
-                        <p>{{ profile.brand_vision }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h5>Mission</h5>
-                        <p>{{ profile.brand_mission }}</p>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <h5>Core Values</h5>
-                    <p>{{ profile.brand_core_values }}</p>
-                </div>
-            </div>
+    <div class="content-progress-section">
+        <!-- Brand Overview Header -->
+        <div class="progress-header">
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Brand Overview</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Complete overview of your brand identity and key information</p>
         </div>
-        <div class="col-md-4">
-            <div class="widget">
-                <h3 class="widget-title">Quick Links</h3>
-                {% if profile.brand_website %}
-                    <a href="{{ profile.brand_website }}" target="_blank" class="btn btn-outline-primary btn-sm d-block mb-2">Brand Website</a>
-                {% endif %}
-                {% if profile.website_blogs %}
-                    <a href="{{ profile.website_blogs }}" target="_blank" class="btn btn-outline-primary btn-sm d-block mb-2">Blog</a>
-                {% endif %}
-                {% if profile.brand_visual_verbal_dna_guidelines %}
-                    <a href="{{ profile.brand_visual_verbal_dna_guidelines }}" target="_blank" class="btn btn-outline-primary btn-sm d-block mb-2">Brand Guidelines</a>
-                {% endif %}
+
+        <div class="platform-grid-enhanced">
+            <!-- Vision Card -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Brand Vision</div>
+                    <div class="platform-status-badge status-active">Core</div>
+                </div>
+                <div class="platform-category">Strategic Direction</div>
+                <div style="color: var(--text-primary); line-height: 1.6;">
+                    {{ profile.brand_vision|default:"Define your brand's future vision" }}
+                </div>
             </div>
-            <div class="widget">
-                <h3 class="widget-title">Contact Information</h3>
-                <p><strong>Primary Contact:</strong><br>
-                {{ profile.primary_contact_first_name }} {{ profile.primary_contact_last_name }}<br>
-                {{ profile.primary_official_email }}<br>
-                {{ profile.primary_phone_number }}</p>
+
+            <!-- Mission Card -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Brand Mission</div>
+                    <div class="platform-status-badge status-active">Core</div>
+                </div>
+                <div class="platform-category">Purpose Statement</div>
+                <div style="color: var(--text-primary); line-height: 1.6;">
+                    {{ profile.brand_mission|default:"Define your brand's mission" }}
+                </div>
+            </div>
+
+            <!-- Core Values Card -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Core Values</div>
+                    <div class="platform-status-badge status-active">Core</div>
+                </div>
+                <div class="platform-category">Brand Foundation</div>
+                <div style="color: var(--text-primary); line-height: 1.6;">
+                    {{ profile.brand_core_values|default:"Define your brand's core values" }}
+                </div>
+            </div>
+
+            <!-- Quick Links Card -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Quick Links</div>
+                    <div class="platform-status-badge {% if profile.brand_website %}status-active{% else %}status-inactive{% endif %}">Resources</div>
+                </div>
+                <div class="platform-category">Brand Resources</div>
                 
-                {% if profile.secondary_contact_first_name %}
-                <p><strong>Secondary Contact:</strong><br>
-                {{ profile.secondary_contact_first_name }} {{ profile.secondary_contact_last_name }}<br>
-                {{ profile.secondary_official_email }}<br>
-                {{ profile.secondary_phone_number }}</p>
-                {% endif %}
+                <div class="content-links-section">
+                    <a href="{% url 'profiles:edit' %}" class="content-link-btn" style="background: var(--accent-success); margin-bottom: 0.5rem;">✏️ Edit Profile</a>
+                    {% if profile.brand_website %}
+                        <a href="{{ profile.brand_website }}" target="_blank" class="content-link-btn">Brand Website</a>
+                    {% endif %}
+                    {% if profile.website_blogs %}
+                        <a href="{{ profile.website_blogs }}" target="_blank" class="content-link-btn">Blog</a>
+                    {% endif %}
+                    {% if profile.brand_visual_verbal_dna_guidelines %}
+                        <a href="{{ profile.brand_visual_verbal_dna_guidelines }}" target="_blank" class="content-link-btn">Brand Guidelines</a>
+                    {% endif %}
+                    {% if not profile.brand_website and not profile.website_blogs and not profile.brand_visual_verbal_dna_guidelines %}
+                        <div style="margin-top: 0.5rem; color: var(--text-secondary); font-style: italic;">No external links configured yet</div>
+                    {% endif %}
+                </div>
             </div>
+
+            <!-- Primary Contact Card -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Primary Contact</div>
+                    <div class="platform-status-badge status-active">Active</div>
+                </div>
+                <div class="platform-category">Main Point of Contact</div>
+                
+                <div style="color: var(--text-primary);">
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong style="color: var(--accent-primary);">{{ profile.primary_contact_first_name }} {{ profile.primary_contact_last_name }}</strong>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.25rem;">
+                        📧 {{ profile.primary_official_email }}
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                        📞 {{ profile.primary_phone_number }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secondary Contact Card (if exists) -->
+            {% if profile.secondary_contact_first_name %}
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Secondary Contact</div>
+                    <div class="platform-status-badge status-active">Active</div>
+                </div>
+                <div class="platform-category">Alternative Contact</div>
+                
+                <div style="color: var(--text-primary);">
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong style="color: var(--accent-primary);">{{ profile.secondary_contact_first_name }} {{ profile.secondary_contact_last_name }}</strong>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.25rem;">
+                        📧 {{ profile.secondary_official_email }}
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                        📞 {{ profile.secondary_phone_number }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
 <!-- Platform Performance Tab -->
 <div id="platforms" class="tab-content">
-    <div class="widget">
-        <h3 class="widget-title">Social Media Platforms</h3>
-        <div class="platform-grid">
+    <div class="content-progress-section">
+        <!-- Platform Performance Header -->
+        <div class="progress-header">
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Platform Performance</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Monitor your social media presence across all platforms</p>
+            
+            <!-- Platform Metrics -->
+            <div class="progress-metrics">
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Total Platforms</div>
+                    <div class="progress-metric-value">{{ social_platforms|length }}</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Active Platforms</div>
+                    <div class="progress-metric-value committed">{% for platform in social_platforms %}{% if platform.status == 'active' %}{{ forloop.counter0|add:1 }}{% endif %}{% endfor %}</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Configured</div>
+                    <div class="progress-metric-value published">{% for platform in social_platforms %}{% if platform.url %}{{ forloop.counter0|add:1 }}{% endif %}{% endfor %}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Platform Grid -->
+        <div class="platform-grid-enhanced">
             {% for platform in social_platforms %}
-            <div class="platform-card {{ platform.status }}">
-                <h5>{{ platform.name }}</h5>
-                <p class="mb-1">
-                    <span class="badge {% if platform.status == 'active' %}bg-success{% else %}bg-danger{% endif %}">
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">{{ platform.name }}</div>
+                    <div class="platform-status-badge {% if platform.status == 'active' %}status-active{% else %}status-inactive{% endif %}">
                         {{ platform.status|title }}
-                    </span>
-                </p>
+                    </div>
+                </div>
+                
+                <div class="platform-category">
+                    {% if platform.name == 'Instagram' or platform.name == 'Pinterest' %}Visual Content Platform
+                    {% elif platform.name == 'LinkedIn' %}Professional Network
+                    {% elif platform.name == 'YouTube' or platform.name == 'TikTok' %}Video Content Platform
+                    {% elif platform.name == 'Twitter/X' or platform.name == 'Threads' %}Real-Time Social
+                    {% elif platform.name == 'Facebook' %}Social Community
+                    {% elif platform.name == 'Medium' or platform.name == 'Quora' %}Content Publishing
+                    {% else %}Social Platform
+                    {% endif %}
+                </div>
+                
+                <div class="progress-stats">
+                    <span>Status: <strong style="color: {% if platform.status == 'active' %}var(--accent-success){% else %}var(--accent-danger){% endif %};">{{ platform.status|title }}</strong></span>
+                    <span>{% if platform.url %}Configured{% else %}Not Setup{% endif %}</span>
+                </div>
+                
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if platform.url %}100{% else %}0{% endif %}%;"></div>
+                </div>
+                
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+                    {% if platform.url %}100% Configured{% else %}Setup Required{% endif %}
+                </div>
+                
                 {% if platform.url %}
-                    <a href="{{ platform.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Visit</a>
+                <div class="content-links-section">
+                    <a href="{{ platform.url }}" target="_blank" class="content-link-btn">Visit {{ platform.name }}</a>
+                </div>
                 {% else %}
-                    <span class="text-muted">Not configured</span>
+                <div style="text-align: center; color: var(--text-secondary); font-style: italic;">
+                    Platform not configured yet
+                </div>
                 {% endif %}
             </div>
             {% endfor %}
@@ -513,36 +738,152 @@
 
 <!-- Analytics & KPIs Tab -->
 <div id="analytics" class="tab-content">
-    <div class="widget">
-        <h3 class="widget-title">Current Performance KPIs</h3>
-        <div class="kpi-grid">
-            <div class="kpi-item">
-                <div class="kpi-value">{{ metrics.website_traffic }}</div>
-                <div>Website Traffic</div>
+    <div class="content-progress-section">
+        <!-- Analytics Header -->
+        <div class="progress-header">
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Analytics & KPIs</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Track your digital marketing performance metrics</p>
+        </div>
+
+        <!-- Enhanced KPI Grid -->
+        <div class="platform-grid-enhanced">
+            <!-- Website Traffic -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Website Traffic</div>
+                    <div class="platform-status-badge {% if metrics.website_traffic != 'N/A' %}status-active{% else %}status-inactive{% endif %}">Traffic</div>
+                </div>
+                <div class="platform-category">Web Analytics</div>
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-primary);">
+                        {{ metrics.website_traffic|default:"N/A" }}
+                    </div>
+                </div>
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if metrics.website_traffic != 'N/A' %}75{% else %}0{% endif %}%;"></div>
+                </div>
             </div>
-            <div class="kpi-item">
-                <div class="kpi-value">{{ metrics.instagram_reach }}</div>
-                <div>Instagram Reach</div>
+
+            <!-- Instagram Reach -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Instagram Reach</div>
+                    <div class="platform-status-badge {% if metrics.instagram_reach != 'N/A' %}status-active{% else %}status-inactive{% endif %}">Social</div>
+                </div>
+                <div class="platform-category">Social Media Analytics</div>
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-success);">
+                        {{ metrics.instagram_reach|default:"N/A" }}
+                    </div>
+                </div>
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if metrics.instagram_reach != 'N/A' %}60{% else %}0{% endif %}%;"></div>
+                </div>
             </div>
-            <div class="kpi-item">
-                <div class="kpi-value">{{ kpis.google_rank|default:"N/A" }}</div>
-                <div>Google SEPR Rank</div>
+
+            <!-- Google SERP Rank -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Google SERP Rank</div>
+                    <div class="platform-status-badge {% if kpis.google_rank != 'N/A' %}status-active{% else %}status-inactive{% endif %}">SEO</div>
+                </div>
+                <div class="platform-category">Search Engine Optimization</div>
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-warning);">
+                        {{ kpis.google_rank|default:"N/A" }}
+                    </div>
+                </div>
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if kpis.google_rank != 'N/A' %}45{% else %}0{% endif %}%;"></div>
+                </div>
             </div>
-            <div class="kpi-item">
-                <div class="kpi-value">{{ metrics.review_rating }}</div>
-                <div>Review Rating</div>
+
+            <!-- Review Rating -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Review Rating</div>
+                    <div class="platform-status-badge {% if metrics.review_rating != 'N/A' %}status-active{% else %}status-inactive{% endif %}">Reviews</div>
+                </div>
+                <div class="platform-category">Customer Satisfaction</div>
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-success);">
+                        {{ metrics.review_rating|default:"N/A" }}
+                    </div>
+                </div>
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if metrics.review_rating != 'N/A' %}80{% else %}0{% endif %}%;"></div>
+                </div>
             </div>
-            <div class="kpi-item">
-                <div class="kpi-value">{{ metrics.posts_per_week }}</div>
-                <div>Posts Per Week</div>
+
+            <!-- Posts Per Week -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Posts Per Week</div>
+                    <div class="platform-status-badge status-active">Content</div>
+                </div>
+                <div class="platform-category">Content Production</div>
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-primary);">
+                        {{ metrics.posts_per_week|default:0 }}
+                    </div>
+                </div>
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {{ metrics.posts_per_week|default:0 }}0%;"></div>
+                </div>
             </div>
-            <div class="kpi-item">
-                <div class="kpi-value">{{ metrics.videos_per_week }}</div>
-                <div>Videos Per Week</div>
+
+            <!-- Videos Per Week -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Videos Per Week</div>
+                    <div class="platform-status-badge status-active">Video</div>
+                </div>
+                <div class="platform-category">Video Content</div>
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-warning);">
+                        {{ metrics.videos_per_week|default:0 }}
+                    </div>
+                </div>
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {{ metrics.videos_per_week|default:0 }}0%;"></div>
+                </div>
             </div>
-            <div class="kpi-item">
-                <div class="kpi-value">{{ metrics.shorts_per_week }}</div>
-                <div>Shorts Per Week</div>
+
+            <!-- Shorts Per Week -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Shorts Per Week</div>
+                    <div class="platform-status-badge status-active">Short Video</div>
+                </div>
+                <div class="platform-category">Short-Form Content</div>
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-success);">
+                        {{ metrics.shorts_per_week|default:0 }}
+                    </div>
+                </div>
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {{ metrics.shorts_per_week|default:0 }}0%;"></div>
+                </div>
+            </div>
+
+            <!-- Total Content Per Week Summary -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Total Content/Week</div>
+                    <div class="platform-status-badge status-active">Summary</div>
+                </div>
+                <div class="platform-category">Overall Content Production</div>
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-primary);">
+                        {{ metrics.total_content_per_week|default:0 }}
+                    </div>
+                </div>
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if metrics.total_content_per_week %}{{ metrics.total_content_per_week }}{% else %}0{% endif %}%;"></div>
+                </div>
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 1rem;">
+                    Combined content output across all formats
+                </div>
             </div>
         </div>
     </div>
@@ -550,46 +891,151 @@
 
 <!-- Strategy & SWOT Tab -->
 <div id="strategy" class="tab-content">
-    <div class="widget">
-        <h3 class="widget-title">SWOT Analysis</h3>
-        <div class="swot-grid">
-            <div>
-                <div class="swot-item swot-strengths">
-                    <h5>Strengths</h5>
+    <div class="content-progress-section">
+        <!-- SWOT Analysis Header -->
+        <div class="progress-header">
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Strategic Analysis (SWOT)</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Comprehensive analysis of your brand's strategic position</p>
+        </div>
+
+        <!-- Enhanced SWOT Grid -->
+        <div class="platform-grid-enhanced">
+            <!-- Strengths Card -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Strengths</div>
+                    <div class="platform-status-badge status-active">Positive</div>
+                </div>
+                <div class="platform-category">Internal Advantages</div>
+                
+                <div style="margin: 1rem 0;">
                     {% for strength in swot.strengths %}
-                        <div class="list-item">{{ strength }}</div>
+                        <div style="background: rgba(0, 230, 118, 0.1); border-left: 3px solid var(--accent-success); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                            {{ strength }}
+                        </div>
                     {% empty %}
-                        <p class="text-muted">No strengths listed</p>
+                        <div style="text-align: center; color: var(--text-secondary); font-style: italic; padding: 2rem;">
+                            No strengths identified yet
+                        </div>
                     {% endfor %}
                 </div>
                 
-                <div class="swot-item swot-opportunities">
-                    <h5>Opportunities</h5>
-                    {% for opportunity in swot.opportunities %}
-                        <div class="list-item">{{ opportunity }}</div>
-                    {% empty %}
-                        <p class="text-muted">No opportunities listed</p>
-                    {% endfor %}
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if swot.strengths %}80{% else %}0{% endif %}%; background: var(--accent-success);"></div>
+                </div>
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    {{ swot.strengths|length }} strength{{ swot.strengths|length|pluralize }} identified
                 </div>
             </div>
-            
-            <div>
-                <div class="swot-item swot-weaknesses">
-                    <h5>Weaknesses</h5>
+
+            <!-- Weaknesses Card -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Weaknesses</div>
+                    <div class="platform-status-badge" style="background: var(--accent-danger); color: white;">Internal</div>
+                </div>
+                <div class="platform-category">Areas for Improvement</div>
+                
+                <div style="margin: 1rem 0;">
                     {% for weakness in swot.weaknesses %}
-                        <div class="list-item">{{ weakness }}</div>
+                        <div style="background: rgba(255, 82, 82, 0.1); border-left: 3px solid var(--accent-danger); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                            {{ weakness }}
+                        </div>
                     {% empty %}
-                        <p class="text-muted">No weaknesses listed</p>
+                        <div style="text-align: center; color: var(--text-secondary); font-style: italic; padding: 2rem;">
+                            No weaknesses identified yet
+                        </div>
                     {% endfor %}
                 </div>
                 
-                <div class="swot-item swot-threats">
-                    <h5>Threats</h5>
-                    {% for threat in swot.threats %}
-                        <div class="list-item">{{ threat }}</div>
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if swot.weaknesses %}60{% else %}0{% endif %}%; background: var(--accent-danger);"></div>
+                </div>
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    {{ swot.weaknesses|length }} weakness{{ swot.weaknesses|length|pluralize }} identified
+                </div>
+            </div>
+
+            <!-- Opportunities Card -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Opportunities</div>
+                    <div class="platform-status-badge" style="background: var(--accent-primary); color: white;">External</div>
+                </div>
+                <div class="platform-category">Market Potential</div>
+                
+                <div style="margin: 1rem 0;">
+                    {% for opportunity in swot.opportunities %}
+                        <div style="background: rgba(0, 212, 255, 0.1); border-left: 3px solid var(--accent-primary); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                            {{ opportunity }}
+                        </div>
                     {% empty %}
-                        <p class="text-muted">No threats listed</p>
+                        <div style="text-align: center; color: var(--text-secondary); font-style: italic; padding: 2rem;">
+                            No opportunities identified yet
+                        </div>
                     {% endfor %}
+                </div>
+                
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if swot.opportunities %}70{% else %}0{% endif %}%; background: var(--accent-primary);"></div>
+                </div>
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    {{ swot.opportunities|length }} opportunit{{ swot.opportunities|length|pluralize:"y,ies" }} identified
+                </div>
+            </div>
+
+            <!-- Threats Card -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Threats</div>
+                    <div class="platform-status-badge" style="background: var(--accent-warning); color: white;">External</div>
+                </div>
+                <div class="platform-category">Risk Factors</div>
+                
+                <div style="margin: 1rem 0;">
+                    {% for threat in swot.threats %}
+                        <div style="background: rgba(255, 152, 0, 0.1); border-left: 3px solid var(--accent-warning); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                            {{ threat }}
+                        </div>
+                    {% empty %}
+                        <div style="text-align: center; color: var(--text-secondary); font-style: italic; padding: 2rem;">
+                            No threats identified yet
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if swot.threats %}50{% else %}0{% endif %}%; background: var(--accent-warning);"></div>
+                </div>
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    {{ swot.threats|length }} threat{{ swot.threats|length|pluralize }} identified
+                </div>
+            </div>
+
+            <!-- SWOT Summary Card -->
+            <div class="platform-card-enhanced" style="grid-column: 1 / -1;">
+                <div class="progress-header" style="margin: 0; padding: 1.5rem; border-radius: 8px;">
+                    <h4 style="color: var(--accent-primary); margin-bottom: 0.5rem;">SWOT Analysis Summary</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.9rem;">Strategic insights based on your analysis</p>
+                    
+                    <div class="progress-metrics">
+                        <div class="progress-metric-card">
+                            <div class="progress-metric-label">Total Strengths</div>
+                            <div class="progress-metric-value published">{{ swot.strengths|length }}</div>
+                        </div>
+                        <div class="progress-metric-card">
+                            <div class="progress-metric-label">Areas to Improve</div>
+                            <div class="progress-metric-value drafted">{{ swot.weaknesses|length }}</div>
+                        </div>
+                        <div class="progress-metric-card">
+                            <div class="progress-metric-label">Market Opportunities</div>
+                            <div class="progress-metric-value committed">{{ swot.opportunities|length }}</div>
+                        </div>
+                        <div class="progress-metric-card">
+                            <div class="progress-metric-label">Risk Factors</div>
+                            <div class="progress-metric-value" style="color: var(--accent-warning);">{{ swot.threats|length }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -598,35 +1044,142 @@
 
 <!-- Business Intelligence Tab -->
 <div id="intelligence" class="tab-content">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="widget">
-                <h3 class="widget-title">Top Partners</h3>
-                {% for partner in business_intel.partners %}
-                    <div class="list-item">{{ partner }}</div>
-                {% empty %}
-                    <p class="text-muted">No partners listed</p>
-                {% endfor %}
+    <div class="content-progress-section">
+        <!-- Business Intelligence Header -->
+        <div class="progress-header">
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Business Intelligence</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Strategic insights into your market position and partnerships</p>
+            
+            <!-- Intelligence Metrics -->
+            <div class="progress-metrics">
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Key Partners</div>
+                    <div class="progress-metric-value committed">{{ business_intel.partners|length }}</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Main Competitors</div>
+                    <div class="progress-metric-value drafted">{{ business_intel.competitors|length }}</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Market Position</div>
+                    <div class="progress-metric-value published">{% if business_intel.partners|length > business_intel.competitors|length %}Strong{% else %}Growing{% endif %}</div>
+                </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="widget">
-                <h3 class="widget-title">Top Competitors</h3>
-                {% for competitor in business_intel.competitors %}
-                    <div class="list-item">{{ competitor }}</div>
-                {% empty %}
-                    <p class="text-muted">No competitors listed</p>
-                {% endfor %}
+
+        <!-- Enhanced Business Intelligence Grid -->
+        <div class="platform-grid-enhanced">
+            <!-- Partners Card -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Strategic Partners</div>
+                    <div class="platform-status-badge {% if business_intel.partners %}status-active{% else %}status-inactive{% endif %}">
+                        {% if business_intel.partners %}{{ business_intel.partners|length }} Partner{{ business_intel.partners|length|pluralize }}{% else %}No Partners{% endif %}
+                    </div>
+                </div>
+                <div class="platform-category">Partnership Network</div>
+                
+                <div style="margin: 1rem 0;">
+                    {% for partner in business_intel.partners %}
+                        <div style="background: rgba(0, 212, 255, 0.1); border-left: 3px solid var(--accent-primary); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary); display: flex; justify-content: space-between; align-items: center;">
+                            <span>{{ partner }}</span>
+                            <span style="color: var(--accent-success); font-size: 0.8rem;">✓ Active</span>
+                        </div>
+                    {% empty %}
+                        <div style="text-align: center; color: var(--text-secondary); font-style: italic; padding: 2rem;">
+                            No strategic partners identified yet
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if business_intel.partners %}{{ business_intel.partners|length }}0{% else %}0{% endif %}%; background: var(--accent-primary);"></div>
+                </div>
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    Partnership network strength
+                </div>
+            </div>
+
+            <!-- Competitors Card -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Key Competitors</div>
+                    <div class="platform-status-badge {% if business_intel.competitors %}status-not-available{% else %}status-inactive{% endif %}" style="{% if business_intel.competitors %}background: var(--accent-warning);{% endif %}">
+                        {% if business_intel.competitors %}{{ business_intel.competitors|length }} Competitor{{ business_intel.competitors|length|pluralize }}{% else %}No Competitors{% endif %}
+                    </div>
+                </div>
+                <div class="platform-category">Competitive Landscape</div>
+                
+                <div style="margin: 1rem 0;">
+                    {% for competitor in business_intel.competitors %}
+                        <div style="background: rgba(255, 152, 0, 0.1); border-left: 3px solid var(--accent-warning); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary); display: flex; justify-content: space-between; align-items: center;">
+                            <span>{{ competitor }}</span>
+                            <span style="color: var(--accent-warning); font-size: 0.8rem;">⚡ Monitor</span>
+                        </div>
+                    {% empty %}
+                        <div style="text-align: center; color: var(--text-secondary); font-style: italic; padding: 2rem;">
+                            No key competitors identified yet
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: {% if business_intel.competitors %}{{ business_intel.competitors|length }}0{% else %}0{% endif %}%; background: var(--accent-warning);"></div>
+                </div>
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    Competitive analysis coverage
+                </div>
+            </div>
+
+            <!-- Market Position Analysis -->
+            <div class="platform-card-enhanced" style="grid-column: 1 / -1;">
+                <div class="platform-header">
+                    <div class="platform-name">Market Position Analysis</div>
+                    <div class="platform-status-badge status-active">Strategic</div>
+                </div>
+                <div class="platform-category">Competitive Intelligence Summary</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 1.5rem 0;">
+                    <!-- Partnership Strength -->
+                    <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <h5 style="color: var(--accent-primary); margin-bottom: 1rem;">Partnership Strength</h5>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="color: var(--text-secondary);">Network Size:</span>
+                            <span style="color: var(--text-primary); font-weight: bold;">{{ business_intel.partners|length }} partners</span>
+                        </div>
+                        <div class="progress-bar-enhanced">
+                            <div class="progress-fill" style="width: {% if business_intel.partners %}80{% else %}10{% endif %}%; background: var(--accent-success);"></div>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 1rem;">
+                            {% if business_intel.partners|length > 3 %}Strong partnership network provides competitive advantage{% elif business_intel.partners %}Moderate partnership base, room for expansion{% else %}Partnership development opportunity identified{% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Competitive Landscape -->
+                    <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <h5 style="color: var(--accent-warning); margin-bottom: 1rem;">Competitive Landscape</h5>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="color: var(--text-secondary);">Key Competitors:</span>
+                            <span style="color: var(--text-primary); font-weight: bold;">{{ business_intel.competitors|length }} identified</span>
+                        </div>
+                        <div class="progress-bar-enhanced">
+                            <div class="progress-fill" style="width: {% if business_intel.competitors %}65{% else %}5{% endif %}%; background: var(--accent-warning);"></div>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 1rem;">
+                            {% if business_intel.competitors|length > 5 %}Highly competitive market requires differentiation{% elif business_intel.competitors %}Moderate competition, strategic positioning important{% else %}Market analysis needed to identify competitors{% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                {% if business_intel.notes %}
+                <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 1rem;">
+                    <h5 style="color: var(--accent-primary); margin-bottom: 1rem;">Strategic Notes</h5>
+                    <p style="color: var(--text-primary); line-height: 1.6;">{{ business_intel.notes }}</p>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
-    
-    {% if business_intel.notes %}
-    <div class="widget">
-        <h3 class="widget-title">Additional Notes</h3>
-        <p>{{ business_intel.notes }}</p>
-    </div>
-    {% endif %}
 </div>
 
 <!-- Content Progress Tab -->
@@ -659,37 +1212,38 @@
             {% endif %}
         </div>
 
-        {% if platform_progress.platforms %}
-            <!-- Content Pipeline Visualization -->
-            <div class="content-pipeline">
-                <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">Content Workflow Pipeline</h4>
-                <p style="color: var(--text-secondary); margin-bottom: 0; font-size: 0.9rem;">Your content journey from commitment to publication</p>
-                
-                <div class="pipeline-stages">
-                    <div class="pipeline-stage">
-                        <div class="stage-circle stage-committed">{{ platform_progress.total_committed }}</div>
-                        <div style="color: var(--text-primary); font-weight: 500;">Committed</div>
-                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Content promised</div>
-                    </div>
-                    <div class="pipeline-stage">
-                        <div class="stage-circle stage-drafted">{{ platform_progress.total_drafted }}</div>
-                        <div style="color: var(--text-primary); font-weight: 500;">Drafted</div>
-                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Work in progress</div>
-                    </div>
-                    <div class="pipeline-stage">
-                        <div class="stage-circle stage-published">{{ platform_progress.total_published }}</div>
-                        <div style="color: var(--text-primary); font-weight: 500;">Published</div>
-                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Live content</div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Enhanced Platform Grid -->
+            {% if platform_progress.platforms or social_platforms %}
             <div class="platform-grid-enhanced">
+                <!-- Show platforms with progress first -->
                 {% for progress in platform_progress.platforms %}
                 <div class="platform-card-enhanced">
                     <div class="platform-header">
-                        <div class="platform-name">{{ progress.get_platform_display }}</div>
+                        <div class="platform-name">
+                            <i class="
+                            {% if progress.platform == 'instagram' %}fab fa-instagram
+                            {% elif progress.platform == 'facebook' %}fab fa-facebook
+                            {% elif progress.platform == 'twitter' %}fab fa-x-twitter
+                            {% elif progress.platform == 'linkedin' %}fab fa-linkedin
+                            {% elif progress.platform == 'tiktok' %}fab fa-tiktok
+                            {% elif progress.platform == 'youtube' %}fab fa-youtube
+                            {% elif progress.platform == 'pinterest' %}fab fa-pinterest
+                            {% elif progress.platform == 'snapchat' %}fab fa-snapchat
+                            {% elif progress.platform == 'telegram' %}fab fa-telegram
+                            {% elif progress.platform == 'medium' %}fab fa-medium
+                            {% elif progress.platform == 'quora' %}fab fa-quora
+                            {% elif progress.platform == 'reddit' %}fab fa-reddit
+                            {% elif progress.platform == 'tumblr' %}fab fa-tumblr
+                            {% elif progress.platform == 'threads' %}fas fa-at
+                            {% elif progress.platform == 'bluesky' %}fas fa-cloud
+                            {% elif progress.platform == 'whatsapp_business' %}fab fa-whatsapp
+                            {% elif progress.platform == 'website_blogs' %}fas fa-globe
+                            {% elif progress.platform == 'email_marketing' %}fas fa-envelope
+                            {% else %}fas fa-share-alt
+                            {% endif %}" style="color: var(--accent-primary); margin-right: 0.75rem; font-size: 1.1rem;"></i>
+                            {{ progress.get_platform_display }}
+                        </div>
                         <div class="platform-status-badge {% if progress.committed > 0 %}status-active{% else %}status-inactive{% endif %}">
                             {% if progress.committed > 0 %}Active{% else %}Planned{% endif %}
                         </div>
@@ -731,6 +1285,73 @@
                     </div>
                     {% endif %}
                 </div>
+                {% endfor %}
+
+                <!-- Show platforms without progress -->
+                {% for platform in social_platforms %}
+                    {% comment %}Check if this platform already has progress{% endcomment %}
+                    {% if platform.field_name not in platform_progress.platform_names %}
+                        <div class="platform-card-enhanced">
+                            <div class="platform-header">
+                                <div class="platform-name">
+                                    <i class="
+                                    {% if platform.field_name == 'instagram' %}fab fa-instagram
+                                    {% elif platform.field_name == 'facebook' %}fab fa-facebook
+                                    {% elif platform.field_name == 'twitter' %}fab fa-x-twitter
+                                    {% elif platform.field_name == 'linkedin' %}fab fa-linkedin
+                                    {% elif platform.field_name == 'tiktok' %}fab fa-tiktok
+                                    {% elif platform.field_name == 'youtube' %}fab fa-youtube
+                                    {% elif platform.field_name == 'pinterest' %}fab fa-pinterest
+                                    {% elif platform.field_name == 'snapchat' %}fab fa-snapchat
+                                    {% elif platform.field_name == 'telegram' %}fab fa-telegram
+                                    {% elif platform.field_name == 'medium' %}fab fa-medium
+                                    {% elif platform.field_name == 'quora' %}fab fa-quora
+                                    {% elif platform.field_name == 'reddit' %}fab fa-reddit
+                                    {% elif platform.field_name == 'tumblr' %}fab fa-tumblr
+                                    {% elif platform.field_name == 'threads' %}fas fa-at
+                                    {% elif platform.field_name == 'bluesky' %}fas fa-cloud
+                                    {% elif platform.field_name == 'whatsapp_business' %}fab fa-whatsapp
+                                    {% elif platform.field_name == 'website_blogs' %}fas fa-globe
+                                    {% else %}fas fa-share-alt
+                                    {% endif %}" style="color: var(--accent-primary); margin-right: 0.75rem; font-size: 1.1rem;"></i>
+                                    {{ platform.name }}
+                                </div>
+                                <div class="platform-status-badge status-inactive">Setup Required</div>
+                            </div>
+                            
+                            <div class="platform-category">
+                                {% if platform.field_name == 'website_blogs' %}Professional Writing
+                                {% elif platform.field_name == 'instagram' or platform.field_name == 'pinterest' %}Visual Content
+                                {% elif platform.field_name == 'linkedin' %}Professional Network
+                                {% elif platform.field_name == 'youtube' or platform.field_name == 'tiktok' %}Video Content
+                                {% elif platform.field_name == 'twitter' or platform.field_name == 'threads' %}Real-Time Social
+                                {% elif platform.field_name == 'facebook' %}Social Community
+                                {% elif platform.field_name == 'medium' %}Professional Writing
+                                {% else %}Digital Platform
+                                {% endif %}
+                            </div>
+                            
+                            <div class="progress-stats">
+                                <span>Committed: <strong style="color: var(--accent-primary);">0</strong></span>
+                                <span>Drafted: <strong style="color: var(--accent-warning);">0</strong></span>
+                                <span>Published: <strong style="color: var(--accent-success);">0</strong></span>
+                            </div>
+                            
+                            <div class="progress-bar-enhanced">
+                                <div class="progress-fill" style="width: 0%;"></div>
+                            </div>
+                            
+                            <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+                                No Content Strategy Yet
+                            </div>
+                            
+                            {% if platform.url %}
+                            <div class="content-links-section">
+                                <a href="{{ platform.url }}" target="_blank" class="content-link-btn">Visit {{ platform.name }}</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                 {% endfor %}
             </div>
         {% else %}
