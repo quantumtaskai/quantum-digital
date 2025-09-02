@@ -525,19 +525,25 @@
         <button class="nav-link active" data-tab="overview">Overview</button>
     </li>
     <li class="nav-item">
-        <button class="nav-link" data-tab="platforms">Platform Performance</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" data-tab="analytics">Analytics & KPIs</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" data-tab="strategy">Strategy & SWOT</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" data-tab="intelligence">Business Intelligence</button>
-    </li>
-    <li class="nav-item">
         <button class="nav-link" data-tab="content-progress">Content Progress</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="situation-analysis">Situation Analysis</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="objectives">Objectives</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="strategy">Strategy</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="tactics">Tactics</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="actions">Actions</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="control">Control</button>
     </li>
 </ul>
 
@@ -661,88 +667,120 @@
     </div>
 </div>
 
-<!-- Platform Performance Tab -->
-<div id="platforms" class="tab-content">
+<!-- Content Progress Tab -->
+<div id="content-progress" class="tab-content">
     <div class="content-progress-section">
-        <!-- Platform Performance Header -->
+        <!-- Progress Header with Metrics -->
         <div class="progress-header">
-            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Platform Performance</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 0;">Monitor your social media presence across all platforms</p>
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Content Progress Dashboard</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Track your content pipeline across all platforms</p>
             
-            <!-- Platform Metrics -->
+            {% if platform_progress.platforms %}
             <div class="progress-metrics">
                 <div class="progress-metric-card">
-                    <div class="progress-metric-label">Total Platforms</div>
-                    <div class="progress-metric-value">{{ social_platforms|length }}</div>
+                    <div class="progress-metric-label">Total Committed</div>
+                    <div class="progress-metric-value committed">{{ platform_progress.total_committed }}</div>
                 </div>
                 <div class="progress-metric-card">
-                    <div class="progress-metric-label">Active Platforms</div>
-                    <div class="progress-metric-value committed">{% for platform in social_platforms %}{% if platform.status == 'active' %}{{ forloop.counter0|add:1 }}{% endif %}{% endfor %}</div>
+                    <div class="progress-metric-label">Total Drafted</div>
+                    <div class="progress-metric-value drafted">{{ platform_progress.total_drafted }}</div>
                 </div>
                 <div class="progress-metric-card">
-                    <div class="progress-metric-label">Configured</div>
-                    <div class="progress-metric-value published">{% for platform in social_platforms %}{% if platform.url %}{{ forloop.counter0|add:1 }}{% endif %}{% endfor %}</div>
+                    <div class="progress-metric-label">Total Published</div>
+                    <div class="progress-metric-value published">{{ platform_progress.total_published }}</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Completion Rate</div>
+                    <div class="progress-metric-value">{{ platform_progress.completion_rate }}%</div>
                 </div>
             </div>
+            {% endif %}
         </div>
 
-        <!-- Enhanced Platform Grid -->
-        <div class="platform-grid-enhanced">
-            {% for platform in social_platforms %}
-            <div class="platform-card-enhanced">
-                <div class="platform-header">
-                    <div class="platform-name">{{ platform.name }}</div>
-                    <div class="platform-status-badge {% if platform.status == 'active' %}status-active{% else %}status-inactive{% endif %}">
-                        {{ platform.status|title }}
+            <!-- Enhanced Platform Grid -->
+            {% if platform_progress.platforms or social_platforms %}
+            <div class="platform-grid-enhanced">
+                <!-- Show platforms with progress first -->
+                {% for progress in platform_progress.platforms %}
+                <div class="platform-card-enhanced">
+                    <div class="platform-header">
+                        <div class="platform-name">
+                            <i class="
+                            {% if progress.platform == 'instagram' %}fab fa-instagram
+                            {% elif progress.platform == 'facebook' %}fab fa-facebook
+                            {% elif progress.platform == 'twitter' %}fab fa-x-twitter
+                            {% elif progress.platform == 'linkedin' %}fab fa-linkedin
+                            {% elif progress.platform == 'tiktok' %}fab fa-tiktok
+                            {% elif progress.platform == 'youtube' %}fab fa-youtube
+                            {% elif progress.platform == 'pinterest' %}fab fa-pinterest
+                            {% elif progress.platform == 'snapchat' %}fab fa-snapchat
+                            {% elif progress.platform == 'telegram' %}fab fa-telegram
+                            {% elif progress.platform == 'medium' %}fab fa-medium
+                            {% elif progress.platform == 'quora' %}fab fa-quora
+                            {% elif progress.platform == 'reddit' %}fab fa-reddit
+                            {% elif progress.platform == 'tumblr' %}fab fa-tumblr
+                            {% elif progress.platform == 'threads' %}fas fa-at
+                            {% elif progress.platform == 'bluesky' %}fas fa-cloud
+                            {% elif progress.platform == 'whatsapp_business' %}fab fa-whatsapp
+                            {% elif progress.platform == 'website_blogs' %}fas fa-globe
+                            {% elif progress.platform == 'email_marketing' %}fas fa-envelope
+                            {% else %}fas fa-share-alt
+                            {% endif %}" style="color: var(--accent-primary); margin-right: 0.75rem; font-size: 1.1rem;"></i>
+                            {{ progress.get_platform_display }}
+                        </div>
+                        <div class="platform-status-badge {% if progress.committed > 0 %}status-active{% else %}status-inactive{% endif %}">
+                            {% if progress.committed > 0 %}Active{% else %}Planned{% endif %}
+                        </div>
                     </div>
-                </div>
                 
-                <div class="platform-category">
-                    {% if platform.name == 'Instagram' or platform.name == 'Pinterest' %}Visual Content Platform
-                    {% elif platform.name == 'LinkedIn' %}Professional Network
-                    {% elif platform.name == 'YouTube' or platform.name == 'TikTok' %}Video Content Platform
-                    {% elif platform.name == 'Twitter/X' or platform.name == 'Threads' %}Real-Time Social
-                    {% elif platform.name == 'Facebook' %}Social Community
-                    {% elif platform.name == 'Medium' or platform.name == 'Quora' %}Content Publishing
-                    {% else %}Social Platform
+                    <div class="platform-category">
+                        {% if progress.platform == 'website_blogs' %}Professional Writing
+                        {% elif progress.platform == 'instagram' or progress.platform == 'pinterest' %}Visual Content
+                        {% elif progress.platform == 'linkedin' %}Professional Network
+                        {% elif progress.platform == 'youtube' or progress.platform == 'tiktok' %}Video Content
+                        {% elif progress.platform == 'twitter' or progress.platform == 'threads' %}Real-Time Social
+                        {% elif progress.platform == 'facebook' %}Social Community
+                        {% elif progress.platform == 'medium' %}Professional Writing
+                        {% elif progress.platform == 'email_marketing' %}Direct Marketing
+                        {% else %}Digital Platform
+                        {% endif %}
+                    </div>
+                    
+                    <div class="progress-stats">
+                        <span>Committed: <strong style="color: var(--accent-primary);">{{ progress.committed }}</strong></span>
+                        <span>Drafted: <strong style="color: var(--accent-warning);">{{ progress.drafted }}</strong></span>
+                        <span>Published: <strong style="color: var(--accent-success);">{{ progress.published }}</strong></span>
+                    </div>
+                    
+                    <div class="progress-bar-enhanced">
+                        <div class="progress-fill" style="width: {{ progress.completion_percentage }}%;"></div>
+                    </div>
+                    
+                    <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+                        {{ progress.completion_percentage }}% Complete
+                    </div>
+                    
+                    {% if progress.content_links.all %}
+                    <div class="content-links-section">
+                        <div style="color: var(--text-primary); font-weight: 500; margin-bottom: 0.5rem; font-size: 0.9rem;">Content Resources:</div>
+                        {% for link in progress.content_links.all %}
+                            <a href="{{ link.url }}" target="_blank" class="content-link-btn">{{ link.title }}</a>
+                        {% endfor %}
+                    </div>
                     {% endif %}
-                </div>
-                
-                <div class="progress-stats">
-                    <span>Status: <strong style="color: {% if platform.status == 'active' %}var(--accent-success){% else %}var(--accent-danger){% endif %};">{{ platform.status|title }}</strong></span>
-                    <span>{% if platform.url %}Configured{% else %}Not Setup{% endif %}</span>
-                </div>
-                
-                <div class="progress-bar-enhanced">
-                    <div class="progress-fill" style="width: {% if platform.url %}100{% else %}0{% endif %}%;"></div>
-                </div>
-                
-                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
-                    {% if platform.url %}100% Configured{% else %}Setup Required{% endif %}
-                </div>
-                
-                {% if platform.url %}
-                <div class="content-links-section">
-                    <a href="{{ platform.url }}" target="_blank" class="content-link-btn">Visit {{ platform.name }}</a>
-                </div>
-                {% else %}
-                <div style="text-align: center; color: var(--text-secondary); font-style: italic;">
-                    Platform not configured yet
-                </div>
-                {% endif %}
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
 
-<!-- Analytics & KPIs Tab -->
-<div id="analytics" class="tab-content">
+<!-- Situation Analysis Tab -->
+<div id="situation-analysis" class="tab-content">
     <div class="content-progress-section">
         <!-- Analytics Header -->
         <div class="progress-header">
-            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Analytics & KPIs</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 0;">Track your digital marketing performance metrics</p>
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Situation Analysis</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Current market position and competitive landscape</p>
         </div>
 
         <!-- Enhanced KPI Grid -->
@@ -889,13 +927,13 @@
     </div>
 </div>
 
-<!-- Strategy & SWOT Tab -->
-<div id="strategy" class="tab-content">
+<!-- Objectives Tab -->
+<div id="objectives" class="tab-content">
     <div class="content-progress-section">
         <!-- SWOT Analysis Header -->
         <div class="progress-header">
-            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Strategic Analysis (SWOT)</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 0;">Comprehensive analysis of your brand's strategic position</p>
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Objectives</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Strategic goals and measurable targets</p>
         </div>
 
         <!-- Enhanced SWOT Grid -->
@@ -1042,13 +1080,13 @@
     </div>
 </div>
 
-<!-- Business Intelligence Tab -->
-<div id="intelligence" class="tab-content">
+<!-- Strategy Tab -->
+<div id="strategy" class="tab-content">
     <div class="content-progress-section">
         <!-- Business Intelligence Header -->
         <div class="progress-header">
-            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Business Intelligence</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 0;">Strategic insights into your market position and partnerships</p>
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Strategy</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Market positioning and value proposition</p>
             
             <!-- Intelligence Metrics -->
             <div class="progress-metrics">
@@ -1182,13 +1220,13 @@
     </div>
 </div>
 
-<!-- Content Progress Tab -->
-<div id="content-progress" class="tab-content">
+<!-- Tactics Tab -->
+<div id="tactics" class="tab-content">
     <div class="content-progress-section">
-        <!-- Progress Header with Metrics -->
+        <!-- Tactics Header -->
         <div class="progress-header">
-            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Content Progress Dashboard</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 0;">Track your content pipeline across all platforms</p>
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Tactics</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Implementation methods and channels</p>
             
             {% if platform_progress.platforms %}
             <div class="progress-metrics">
@@ -1360,6 +1398,201 @@
                 <p style="color: var(--text-secondary); margin-bottom: 0;">Our team is currently setting up your personalized content strategy based on your onboarding information. You'll see your platform progress here once it's ready.</p>
             </div>
         {% endif %}
+    {% endif %}
+    </div>
+</div>
+
+<!-- Actions Tab -->
+<div id="actions" class="tab-content">
+    <div class="content-progress-section">
+        <!-- Actions Header -->
+        <div class="progress-header">
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Actions</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Specific steps and timeline</p>
+            
+            <div class="progress-metrics">
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Action Items</div>
+                    <div class="progress-metric-value committed">12</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">In Progress</div>
+                    <div class="progress-metric-value drafted">4</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Completed</div>
+                    <div class="progress-metric-value published">8</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">On Schedule</div>
+                    <div class="progress-metric-value">75%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Action Grid -->
+        <div class="platform-grid-enhanced">
+            <!-- Tesla Market Position Action -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Market Position Analysis</div>
+                    <div class="platform-status-badge status-active">High Priority</div>
+                </div>
+                <div class="platform-category">Strategic Foundation</div>
+                
+                <div style="margin: 1rem 0;">
+                    <div style="background: rgba(0, 212, 255, 0.1); border-left: 3px solid var(--accent-primary); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Action:</strong> Conduct comprehensive analysis of Tesla's position in the EV market
+                    </div>
+                    <div style="background: rgba(255, 152, 0, 0.1); border-left: 3px solid var(--accent-warning); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Timeline:</strong> Week 1-2 of implementation
+                    </div>
+                    <div style="background: rgba(0, 230, 118, 0.1); border-left: 3px solid var(--accent-success); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Owner:</strong> Strategy Team Lead
+                    </div>
+                </div>
+                
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: 85%; background: var(--accent-success);"></div>
+                </div>
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    85% Complete - On Track
+                </div>
+            </div>
+
+            <!-- Product Portfolio Review -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Product Portfolio Review</div>
+                    <div class="platform-status-badge status-active">Medium Priority</div>
+                </div>
+                <div class="platform-category">Product Strategy</div>
+                
+                <div style="margin: 1rem 0;">
+                    <div style="background: rgba(0, 212, 255, 0.1); border-left: 3px solid var(--accent-primary); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Action:</strong> Evaluate Model S, 3, X, Y and upcoming Cybertruck positioning
+                    </div>
+                    <div style="background: rgba(255, 152, 0, 0.1); border-left: 3px solid var(--accent-warning); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Timeline:</strong> Week 2-3 of implementation
+                    </div>
+                    <div style="background: rgba(0, 230, 118, 0.1); border-left: 3px solid var(--accent-success); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Owner:</strong> Product Marketing Team
+                    </div>
+                </div>
+                
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: 60%; background: var(--accent-warning);"></div>
+                </div>
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    60% Complete - In Progress
+                </div>
+            </div>
+
+            <!-- Coming Soon Placeholder -->
+            <div class="platform-card-enhanced" style="grid-column: 1 / -1; border: 2px dashed var(--border-color); opacity: 0.7;">
+                <div style="text-align: center; padding: 2rem;">
+                    <h4 style="color: var(--accent-primary); margin-bottom: 1rem;">Additional Actions Coming Soon</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 0;">Detailed action plans and timelines will be populated based on your strategic analysis and objectives.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Control Tab -->
+<div id="control" class="tab-content">
+    <div class="content-progress-section">
+        <!-- Control Header -->
+        <div class="progress-header">
+            <h3 style="color: var(--accent-primary); margin-bottom: 0;">Control</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0;">Monitoring and measurement framework</p>
+            
+            <div class="progress-metrics">
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">KPIs Tracked</div>
+                    <div class="progress-metric-value committed">8</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Reports Generated</div>
+                    <div class="progress-metric-value drafted">3</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Performance</div>
+                    <div class="progress-metric-value published">92%</div>
+                </div>
+                <div class="progress-metric-card">
+                    <div class="progress-metric-label">Alert Status</div>
+                    <div class="progress-metric-value" style="color: var(--accent-success);">Green</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Control Grid -->
+        <div class="platform-grid-enhanced">
+            <!-- Performance Dashboard -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Performance Dashboard</div>
+                    <div class="platform-status-badge status-active">Real-time</div>
+                </div>
+                <div class="platform-category">Monitoring & Analytics</div>
+                
+                <div style="margin: 1rem 0;">
+                    <div style="background: rgba(0, 212, 255, 0.1); border-left: 3px solid var(--accent-primary); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Metric:</strong> Market Share Growth - Target: +2% quarterly
+                    </div>
+                    <div style="background: rgba(0, 230, 118, 0.1); border-left: 3px solid var(--accent-success); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Current:</strong> +2.3% this quarter ✓ On Target
+                    </div>
+                    <div style="background: rgba(255, 152, 0, 0.1); border-left: 3px solid var(--accent-warning); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Review:</strong> Monthly performance review scheduled
+                    </div>
+                </div>
+                
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: 92%; background: var(--accent-success);"></div>
+                </div>
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    92% Performance Score
+                </div>
+            </div>
+
+            <!-- Brand Perception Tracking -->
+            <div class="platform-card-enhanced">
+                <div class="platform-header">
+                    <div class="platform-name">Brand Perception Tracking</div>
+                    <div class="platform-status-badge" style="background: var(--accent-warning); color: white;">Monitoring</div>
+                </div>
+                <div class="platform-category">Brand Health Metrics</div>
+                
+                <div style="margin: 1rem 0;">
+                    <div style="background: rgba(0, 212, 255, 0.1); border-left: 3px solid var(--accent-primary); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Metric:</strong> Brand Sentiment Score - Innovation Leadership
+                    </div>
+                    <div style="background: rgba(255, 152, 0, 0.1); border-left: 3px solid var(--accent-warning); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Current:</strong> Monitoring CEO public image impact
+                    </div>
+                    <div style="background: rgba(0, 230, 118, 0.1); border-left: 3px solid var(--accent-success); padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; color: var(--text-primary);">
+                        <strong>Action:</strong> Weekly sentiment analysis reports
+                    </div>
+                </div>
+                
+                <div class="progress-bar-enhanced">
+                    <div class="progress-fill" style="width: 78%; background: var(--accent-warning);"></div>
+                </div>
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    78% Positive Sentiment
+                </div>
+            </div>
+
+            <!-- Coming Soon Placeholder -->
+            <div class="platform-card-enhanced" style="grid-column: 1 / -1; border: 2px dashed var(--border-color); opacity: 0.7;">
+                <div style="text-align: center; padding: 2rem;">
+                    <h4 style="color: var(--accent-primary); margin-bottom: 1rem;">Advanced Control Systems Coming Soon</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 0;">Automated reporting, alert systems, and comprehensive measurement frameworks will be implemented based on your specific strategic objectives.</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
