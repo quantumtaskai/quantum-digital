@@ -37,6 +37,20 @@ if os.getenv('CAPROVER_GIT_COMMIT_SHA'):
     # Running on CapRover - trust all hosts for now, restrict in production
     ALLOWED_HOSTS = ['*']
 
+# CSRF Configuration
+CSRF_TRUSTED_ORIGINS = [
+    'https://qdb-g66u.onrender.com',  # Render deployment
+    'https://quantum-digital.69.62.81.168.nip.io',  # CapRover deployment
+    'http://quantum-digital.69.62.81.168.nip.io',   # CapRover HTTP fallback
+]
+
+# Add dynamic CSRF support for CapRover
+if os.getenv('CAPROVER_FRONTEND_ADDR'):
+    CSRF_TRUSTED_ORIGINS.extend([
+        f"https://{os.getenv('CAPROVER_FRONTEND_ADDR')}",
+        f"http://{os.getenv('CAPROVER_FRONTEND_ADDR')}"
+    ])
+
 
 # Application definition
 
