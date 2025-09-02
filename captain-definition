@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 2,
+  "templateId": "python/3.11",
+  "dockerfilePath": "./Dockerfile.captain"
+}

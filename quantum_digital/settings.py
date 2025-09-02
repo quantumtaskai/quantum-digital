@@ -32,6 +32,11 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+# Add CapRover support
+if os.getenv('CAPROVER_GIT_COMMIT_SHA'):
+    # Running on CapRover - trust all hosts for now, restrict in production
+    ALLOWED_HOSTS = ['*']
+
 
 # Application definition
 
