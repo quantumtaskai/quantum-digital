@@ -49,3 +49,10 @@ Thumbs.db
 
 # Render
 .render/
+
+# Backups
+backups/
+*.sql
+*.sql.gz
+*.dump
+*.backup

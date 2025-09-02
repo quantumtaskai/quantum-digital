@@ -1,0 +1,150 @@
+name: 🔄 Automated Database Backup
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    name: 📦 Database Backup
+    
+    steps:
+    - name: 🔽 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📅 Generate backup filename
+      id: date
+      run: |
+        echo "DATE=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+        echo "SIMPLE_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+        
+    - name: 🗄️ Create database backup
+      run: |
+        # Install PostgreSQL client
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        
+        # Create backup
+        PGPASSWORD="${{ secrets.DB_PASSWORD }}" pg_dump \
+          -h ${{ secrets.DB_HOST }} \
+          -p ${{ secrets.DB_PORT }} \
+          -U ${{ secrets.DB_USER }} \
+          -d ${{ secrets.DB_NAME }} \
+          -f "quantum-digital-backup-${{ steps.date.outputs.DATE }}.sql"
+        
+        # Compress backup
+        gzip "quantum-digital-backup-${{ steps.date.outputs.DATE }}.sql"
+        
+        # Create checksums
+        sha256sum "quantum-digital-backup-${{ steps.date.outputs.DATE }}.sql.gz" > backup-checksum.txt
+        
+        echo "BACKUP_FILE=quantum-digital-backup-${{ steps.date.outputs.DATE }}.sql.gz" >> $GITHUB_ENV
+        
+    - name: 📊 Backup information
+      run: |
+        echo "### Backup Information" >> backup-info.txt
+        echo "- **Date:** ${{ steps.date.outputs.SIMPLE_DATE }}" >> backup-info.txt
+        echo "- **Time:** $(date +'%H:%M:%S UTC')" >> backup-info.txt
+        echo "- **Database:** ${{ secrets.DB_NAME }}" >> backup-info.txt
+        echo "- **Size:** $(du -h $BACKUP_FILE | cut -f1)" >> backup-info.txt
+        echo "- **SHA256:** $(cat backup-checksum.txt | cut -d' ' -f1)" >> backup-info.txt
+        echo "" >> backup-info.txt
+        echo "### Restore Instructions" >> backup-info.txt
+        echo "1. Download the backup file" >> backup-info.txt
+        echo "2. Decompress: \`gunzip $BACKUP_FILE\`" >> backup-info.txt
+        echo "3. Restore: \`psql -h HOST -U USER -d DATABASE < backup.sql\`" >> backup-info.txt
+        
+    - name: 🏷️ Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: backup-${{ steps.date.outputs.DATE }}
+        release_name: 📦 Database Backup - ${{ steps.date.outputs.SIMPLE_DATE }}
+        body_path: backup-info.txt
+        draft: false
+        prerelease: false
+        
+    - name: ⬆️ Upload backup file
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ env.BACKUP_FILE }}
+        asset_name: ${{ env.BACKUP_FILE }}
+        asset_content_type: application/gzip
+        
+    - name: ⬆️ Upload checksum
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: backup-checksum.txt
+        asset_name: backup-checksum.txt
+        asset_content_type: text/plain
+
+    - name: 🧹 Cleanup old backups (keep last 30)
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Get all releases and delete old backup releases (keep last 30)
+        curl -s -H "Authorization: token $GITHUB_TOKEN" \
+          https://api.github.com/repos/$GITHUB_REPOSITORY/releases | \
+          jq -r '.[] | select(.tag_name | startswith("backup-")) | .id' | \
+          tail -n +31 | \
+          while read release_id; do
+            curl -s -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
+              https://api.github.com/repos/$GITHUB_REPOSITORY/releases/$release_id
+          done
+
+  notify:
+    needs: backup
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: 📧 Send notification email
+      if: failure()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: 🚨 Database Backup Failed - Quantum Digital
+        body: |
+          The automated database backup for Quantum Digital has failed.
+          
+          Please check the GitHub Actions logs and investigate immediately.
+          
+          Repository: ${{ github.repository }}
+          Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+          Time: ${{ github.event.head_commit.timestamp }}
+        to: thecyberlearn@gmail.com
+        from: Quantum Digital Backup System
+        
+    - name: ✅ Success notification
+      if: success()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: ✅ Database Backup Successful - Quantum Digital
+        body: |
+          The automated database backup for Quantum Digital completed successfully.
+          
+          Repository: ${{ github.repository }}
+          Download: ${{ github.server_url }}/${{ github.repository }}/releases/latest
+          
+          Time: ${{ github.event.head_commit.timestamp }}
+        to: thecyberlearn@gmail.com
+        from: Quantum Digital Backup System
