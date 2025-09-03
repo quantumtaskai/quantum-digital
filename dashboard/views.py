@@ -125,18 +125,45 @@ def get_business_intelligence(profile):
 
 def get_platform_progress(user):
     """Get platform progress data from admin updates"""
-    platform_progress = ClientPlatformProgress.objects.filter(user=user)
+    # Get existing progress records
+    existing_progress = ClientPlatformProgress.objects.filter(user=user)
+    existing_platforms = {p.platform: p for p in existing_progress}
     
-    total_committed = sum(p.committed for p in platform_progress)
-    total_drafted = sum(p.drafted for p in platform_progress)
-    total_published = sum(p.published for p in platform_progress)
+    # Create full platform list with defaults for missing ones
+    all_platforms = []
+    platform_names = []
+    
+    for platform_code, platform_name in ClientPlatformProgress.PLATFORM_CHOICES:
+        if platform_code in existing_platforms:
+            # Use existing data
+            progress = existing_platforms[platform_code]
+        else:
+            # Create default data structure (not saved to DB)
+            class DefaultProgress:
+                def __init__(self, platform_code, platform_name):
+                    self.platform = platform_code
+                    self.committed = 0
+                    self.drafted = 0
+                    self.published = 0
+                    self.completion_percentage = 0
+                    self.content_links = type('MockManager', (), {'all': lambda: []})()
+                
+                def get_platform_display(self):
+                    return dict(ClientPlatformProgress.PLATFORM_CHOICES)[self.platform]
+            
+            progress = DefaultProgress(platform_code, platform_name)
+        
+        all_platforms.append(progress)
+        platform_names.append(platform_code)
+    
+    # Calculate totals from existing progress only
+    total_committed = sum(p.committed for p in existing_progress)
+    total_drafted = sum(p.drafted for p in existing_progress)
+    total_published = sum(p.published for p in existing_progress)
     completion_rate = (total_published / total_committed * 100) if total_committed > 0 else 0
     
-    # Get list of platform names that have progress data
-    platform_names = list(platform_progress.values_list('platform', flat=True))
-    
     return {
-        'platforms': platform_progress,
+        'platforms': all_platforms,
         'platform_names': platform_names,
         'total_committed': total_committed,
         'total_drafted': total_drafted,

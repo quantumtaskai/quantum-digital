@@ -698,9 +698,8 @@
         </div>
 
             <!-- Enhanced Platform Grid -->
-            {% if platform_progress.platforms or social_platforms %}
             <div class="platform-grid-enhanced">
-                <!-- Show platforms with progress first -->
+                <!-- Show all platforms (existing data or defaults) -->
                 {% for progress in platform_progress.platforms %}
                 <div class="platform-card-enhanced">
                     <div class="platform-header">
@@ -724,24 +723,33 @@
                             {% elif progress.platform == 'whatsapp_business' %}fab fa-whatsapp
                             {% elif progress.platform == 'website_blogs' %}fas fa-globe
                             {% elif progress.platform == 'email_marketing' %}fas fa-envelope
+                            {% elif progress.platform == 'website_downloadable' %}fas fa-download
+                            {% elif progress.platform == 'google_business' %}fab fa-google
+                            {% elif progress.platform == 'twitch' %}fab fa-twitch
+                            {% elif progress.platform == 'bereal' %}fas fa-camera
+                            {% elif progress.platform == 'vimeo' %}fab fa-vimeo
+                            {% elif progress.platform == 'dailymotion' %}fas fa-video
+                            {% elif progress.platform == 'rumble' %}fas fa-play
                             {% else %}fas fa-share-alt
                             {% endif %}" style="color: var(--accent-primary); margin-right: 0.75rem; font-size: 1.1rem;"></i>
                             {{ progress.get_platform_display }}
                         </div>
                         <div class="platform-status-badge {% if progress.committed > 0 %}status-active{% else %}status-inactive{% endif %}">
-                            {% if progress.committed > 0 %}Active{% else %}Planned{% endif %}
+                            {% if progress.committed > 0 %}Active{% else %}Setup Required{% endif %}
                         </div>
                     </div>
                 
                     <div class="platform-category">
-                        {% if progress.platform == 'website_blogs' %}Professional Writing
+                        {% if progress.platform == 'website_blogs' or progress.platform == 'medium' %}Professional Writing
                         {% elif progress.platform == 'instagram' or progress.platform == 'pinterest' %}Visual Content
                         {% elif progress.platform == 'linkedin' %}Professional Network
-                        {% elif progress.platform == 'youtube' or progress.platform == 'tiktok' %}Video Content
+                        {% elif progress.platform == 'youtube' or progress.platform == 'tiktok' or progress.platform == 'twitch' or progress.platform == 'vimeo' or progress.platform == 'dailymotion' or progress.platform == 'rumble' %}Video Content
                         {% elif progress.platform == 'twitter' or progress.platform == 'threads' %}Real-Time Social
                         {% elif progress.platform == 'facebook' %}Social Community
-                        {% elif progress.platform == 'medium' %}Professional Writing
                         {% elif progress.platform == 'email_marketing' %}Direct Marketing
+                        {% elif progress.platform == 'website_downloadable' %}Digital Resources
+                        {% elif progress.platform == 'google_business' %}Local Business
+                        {% elif progress.platform == 'bereal' %}Authentic Visual
                         {% else %}Digital Platform
                         {% endif %}
                     </div>
@@ -757,7 +765,7 @@
                     </div>
                     
                     <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
-                        {{ progress.completion_percentage }}% Complete
+                        {% if progress.committed > 0 %}{{ progress.completion_percentage }}% Complete{% else %}Awaiting Content Strategy{% endif %}
                     </div>
                     
                     {% if progress.content_links.all %}
@@ -1252,9 +1260,8 @@
 
 
             <!-- Enhanced Platform Grid -->
-            {% if platform_progress.platforms or social_platforms %}
             <div class="platform-grid-enhanced">
-                <!-- Show platforms with progress first -->
+                <!-- Show all platforms (existing data or defaults) -->
                 {% for progress in platform_progress.platforms %}
                 <div class="platform-card-enhanced">
                     <div class="platform-header">
@@ -1324,81 +1331,7 @@
                     {% endif %}
                 </div>
                 {% endfor %}
-
-                <!-- Show platforms without progress -->
-                {% for platform in social_platforms %}
-                    {% comment %}Check if this platform already has progress{% endcomment %}
-                    {% if platform.field_name not in platform_progress.platform_names %}
-                        <div class="platform-card-enhanced">
-                            <div class="platform-header">
-                                <div class="platform-name">
-                                    <i class="
-                                    {% if platform.field_name == 'instagram' %}fab fa-instagram
-                                    {% elif platform.field_name == 'facebook' %}fab fa-facebook
-                                    {% elif platform.field_name == 'twitter' %}fab fa-x-twitter
-                                    {% elif platform.field_name == 'linkedin' %}fab fa-linkedin
-                                    {% elif platform.field_name == 'tiktok' %}fab fa-tiktok
-                                    {% elif platform.field_name == 'youtube' %}fab fa-youtube
-                                    {% elif platform.field_name == 'pinterest' %}fab fa-pinterest
-                                    {% elif platform.field_name == 'snapchat' %}fab fa-snapchat
-                                    {% elif platform.field_name == 'telegram' %}fab fa-telegram
-                                    {% elif platform.field_name == 'medium' %}fab fa-medium
-                                    {% elif platform.field_name == 'quora' %}fab fa-quora
-                                    {% elif platform.field_name == 'reddit' %}fab fa-reddit
-                                    {% elif platform.field_name == 'tumblr' %}fab fa-tumblr
-                                    {% elif platform.field_name == 'threads' %}fas fa-at
-                                    {% elif platform.field_name == 'bluesky' %}fas fa-cloud
-                                    {% elif platform.field_name == 'whatsapp_business' %}fab fa-whatsapp
-                                    {% elif platform.field_name == 'website_blogs' %}fas fa-globe
-                                    {% else %}fas fa-share-alt
-                                    {% endif %}" style="color: var(--accent-primary); margin-right: 0.75rem; font-size: 1.1rem;"></i>
-                                    {{ platform.name }}
-                                </div>
-                                <div class="platform-status-badge status-inactive">Setup Required</div>
-                            </div>
-                            
-                            <div class="platform-category">
-                                {% if platform.field_name == 'website_blogs' %}Professional Writing
-                                {% elif platform.field_name == 'instagram' or platform.field_name == 'pinterest' %}Visual Content
-                                {% elif platform.field_name == 'linkedin' %}Professional Network
-                                {% elif platform.field_name == 'youtube' or platform.field_name == 'tiktok' %}Video Content
-                                {% elif platform.field_name == 'twitter' or platform.field_name == 'threads' %}Real-Time Social
-                                {% elif platform.field_name == 'facebook' %}Social Community
-                                {% elif platform.field_name == 'medium' %}Professional Writing
-                                {% else %}Digital Platform
-                                {% endif %}
-                            </div>
-                            
-                            <div class="progress-stats">
-                                <span>Committed: <strong style="color: var(--accent-primary);">0</strong></span>
-                                <span>Drafted: <strong style="color: var(--accent-warning);">0</strong></span>
-                                <span>Published: <strong style="color: var(--accent-success);">0</strong></span>
-                            </div>
-                            
-                            <div class="progress-bar-enhanced">
-                                <div class="progress-fill" style="width: 0%;"></div>
-                            </div>
-                            
-                            <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
-                                No Content Strategy Yet
-                            </div>
-                            
-                            {% if platform.url %}
-                            <div class="content-links-section">
-                                <a href="{{ platform.url }}" target="_blank" class="content-link-btn">Visit {{ platform.name }}</a>
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                {% endfor %}
             </div>
-        {% else %}
-            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; text-align: center; border: 1px solid var(--border-color);">
-                <h5 style="color: var(--accent-primary); margin-bottom: 1rem;">Content Strategy Being Prepared</h5>
-                <p style="color: var(--text-secondary); margin-bottom: 0;">Our team is currently setting up your personalized content strategy based on your onboarding information. You'll see your platform progress here once it's ready.</p>
-            </div>
-        {% endif %}
-    {% endif %}
     </div>
 </div>
 
