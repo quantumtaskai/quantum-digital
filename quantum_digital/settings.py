@@ -32,6 +32,10 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+# Add production domain
+if 'digital.quantumtaskai.com' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append('digital.quantumtaskai.com')
+
 # Add CapRover support
 if os.getenv('CAPROVER_GIT_COMMIT_SHA'):
     # Running on CapRover - trust all hosts for now, restrict in production
@@ -39,6 +43,7 @@ if os.getenv('CAPROVER_GIT_COMMIT_SHA'):
 
 # CSRF Configuration
 CSRF_TRUSTED_ORIGINS = [
+    'https://digital.quantumtaskai.com',  # Production domain
     'https://qdb-g66u.onrender.com',  # Render deployment
     'https://quantum-digital.69.62.81.168.nip.io',  # CapRover deployment
     'http://quantum-digital.69.62.81.168.nip.io',   # CapRover HTTP fallback
@@ -61,6 +66,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    
+    # Allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.github',
+    'allauth.socialaccount.providers.linkedin_oauth2',
+    
+    # Local apps
     'accounts',
     'profiles',
     'dashboard',
@@ -73,6 +90,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'quantum_digital.middleware.OnboardingMiddleware',
@@ -158,6 +176,92 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# Django Sites Framework
+SITE_ID = 1
+
+# Django Allauth Configuration
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Allauth Settings
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
+
+# Social Account Settings
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'optional'
+SOCIALACCOUNT_QUERY_EMAIL = True
+
+# Redirect after social login
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# Social provider settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    },
+    'facebook': {
+        'METHOD': 'oauth2',
+        'SDK_URL': '//connect.facebook.net/{locale}/sdk.js',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'INIT_PARAMS': {'cookie': True},
+        'FIELDS': [
+            'id',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'name',
+            'name_format',
+            'picture',
+            'short_name',
+            'email'
+        ],
+        'EXCHANGE_TOKEN': True,
+        'LOCALE_FUNC': 'path.to.callable',
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v17.0',
+    },
+    'github': {
+        'SCOPE': [
+            'user:email',
+        ],
+    },
+    'linkedin_oauth2': {
+        'SCOPE': [
+            'r_emailaddress',
+            'r_liteprofile',
+        ],
+        'PROFILE_FIELDS': [
+            'id',
+            'first-name',
+            'last-name',
+            'email-address',
+            'picture-url',
+            'public-profile-url',
+        ]
+    },
+}
+
+# OAuth Credentials (to be set in environment variables)
+SOCIALACCOUNT_STORE_TOKENS = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

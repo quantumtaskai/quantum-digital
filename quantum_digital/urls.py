@@ -26,7 +26,10 @@ def home_redirect(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_redirect, name='home'),
+    # Custom accounts URLs first (login/signup templates)
     path('accounts/', include('accounts.urls')),
+    # Allauth social auth URLs (for OAuth callbacks)
+    path('accounts/', include('allauth.urls')),
     path('profiles/', include('profiles.urls')),
     path('dashboard/', include('dashboard.urls')),
 ]
