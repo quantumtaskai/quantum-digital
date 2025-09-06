@@ -1395,6 +1395,7 @@
 
 
             <!-- Enhanced Platform Grid -->
+            {% if platform_progress.platforms %}
             <div class="platform-grid-enhanced">
                 <!-- Show all platforms (existing data or defaults) -->
                 {% for progress in platform_progress.platforms %}
