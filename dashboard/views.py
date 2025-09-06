@@ -12,20 +12,74 @@ def dashboard_view(request):
     except BrandProfile.DoesNotExist:
         return redirect('profiles:onboarding')
     
-    # Parse profile data for dashboard
-    context = {
-        'profile': profile,
-        'brand_name': profile.brand_name,
-        'metrics': calculate_metrics(profile),
-        'platforms': get_platform_data(profile),
-        'social_platforms': get_social_platforms(profile),
-        'kpis': get_kpis(profile),
-        'swot': get_swot_analysis(profile),
-        'business_intel': get_business_intelligence(profile),
-        'platform_progress': get_platform_progress(request.user),
-    }
-    
-    return render(request, 'dashboard/dashboard.html', context)
+    try:
+        # Parse profile data for dashboard with individual error handling
+        context = {
+            'profile': profile,
+            'brand_name': getattr(profile, 'brand_name', 'Unknown Brand'),
+        }
+        
+        # Add each context item with error handling
+        try:
+            context['metrics'] = calculate_metrics(profile)
+        except Exception as e:
+            print(f"Error calculating metrics: {e}")
+            context['metrics'] = {'total_platforms': 0, 'active_platforms': 0}
+        
+        try:
+            context['platforms'] = get_platform_data(profile)
+        except Exception as e:
+            print(f"Error getting platform data: {e}")
+            context['platforms'] = {}
+        
+        try:
+            context['social_platforms'] = get_social_platforms(profile)
+        except Exception as e:
+            print(f"Error getting social platforms: {e}")
+            context['social_platforms'] = []
+        
+        try:
+            context['kpis'] = get_kpis(profile)
+        except Exception as e:
+            print(f"Error getting KPIs: {e}")
+            context['kpis'] = {}
+        
+        try:
+            context['swot'] = get_swot_analysis(profile)
+        except Exception as e:
+            print(f"Error getting SWOT: {e}")
+            context['swot'] = {'strengths': [], 'weaknesses': [], 'opportunities': [], 'threats': []}
+        
+        try:
+            context['business_intel'] = get_business_intelligence(profile)
+        except Exception as e:
+            print(f"Error getting business intel: {e}")
+            context['business_intel'] = {'partners': [], 'competitors': [], 'notes': ''}
+        
+        try:
+            context['platform_progress'] = get_platform_progress(request.user)
+        except Exception as e:
+            print(f"Error getting platform progress: {e}")
+            context['platform_progress'] = {'platforms': [], 'platform_names': []}
+        
+        return render(request, 'dashboard/dashboard.html', context)
+        
+    except Exception as e:
+        print(f"Dashboard view error: {e}")
+        import traceback
+        print(traceback.format_exc())
+        # Return a minimal context to prevent total failure
+        return render(request, 'dashboard/dashboard.html', {
+            'profile': profile,
+            'brand_name': getattr(profile, 'brand_name', 'Unknown Brand'),
+            'metrics': {'total_platforms': 0, 'active_platforms': 0},
+            'platforms': {},
+            'social_platforms': [],
+            'kpis': {},
+            'swot': {'strengths': [], 'weaknesses': [], 'opportunities': [], 'threats': []},
+            'business_intel': {'partners': [], 'competitors': [], 'notes': ''},
+            'platform_progress': {'platforms': [], 'platform_names': []},
+        })
 
 
 def calculate_metrics(profile):
