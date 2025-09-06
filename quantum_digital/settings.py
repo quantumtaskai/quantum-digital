@@ -49,6 +49,15 @@ CSRF_TRUSTED_ORIGINS = [
     'http://quantum-digital.69.62.81.168.nip.io',   # CapRover HTTP fallback
 ]
 
+# Tell Django to trust reverse proxy headers (Dockploy terminates SSL)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Ensure allauth builds https URLs for redirects (e.g., Google callback)
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+
 # Add dynamic CSRF support for CapRover
 if os.getenv('CAPROVER_FRONTEND_ADDR'):
     CSRF_TRUSTED_ORIGINS.extend([
