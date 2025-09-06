@@ -1,8 +1,8 @@
 services:
-  web:
+  app:
     build: .
-    expose:
-      - "8000"
+    ports:
+      - "8000:8000"
     environment:
       - DEBUG=False
       - ALLOWED_HOSTS=digital.quantumtaskai.com,localhost,127.0.0.1
@@ -10,29 +10,8 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - GOOGLE_OAUTH2_CLIENT_ID=${GOOGLE_OAUTH2_CLIENT_ID:-demo-google-client-id}
       - GOOGLE_OAUTH2_CLIENT_SECRET=${GOOGLE_OAUTH2_CLIENT_SECRET:-demo-google-client-secret}
-    volumes:
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
-             python manage.py shell -c \"
-             from django.contrib.sites.models import Site;
-             site, created = Site.objects.get_or_create(pk=1);
-             site.domain = 'digital.quantumtaskai.com';
-             site.name = 'Quantum Digital';
-             site.save();
-             print('Site configured for production: digital.quantumtaskai.com')
-             \" &&
+             python manage.py shell -c 'from django.contrib.sites.models import Site; site, created = Site.objects.get_or_create(pk=1); site.domain = \"digital.quantumtaskai.com\"; site.name = \"Quantum Digital\"; site.save(); print(\"Site configured for production\")' &&
              gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 quantum_digital.wsgi:application"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-volumes:
-  static_volume:
-  media_volume:
