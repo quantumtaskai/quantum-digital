@@ -42,8 +42,8 @@ def manager_dashboard(request):
     
     # Add platform progress counts to each brand
     for brand in brands:
-        brand.platform_count = ClientPlatformProgress.objects.filter(user=brand.user).count()
-        progress_data = ClientPlatformProgress.objects.filter(user=brand.user).aggregate(
+        brand.platform_count = ClientPlatformProgress.objects.filter(brand=brand).count()
+        progress_data = ClientPlatformProgress.objects.filter(brand=brand).aggregate(
             total_committed=Sum('committed'),
             total_published=Sum('published')
         )
@@ -70,7 +70,7 @@ def brand_detail(request, brand_id):
     brand = get_object_or_404(BrandProfile, id=brand_id)
     
     # Get platform progress for this brand
-    platforms = ClientPlatformProgress.objects.filter(user=brand.user).order_by('platform')
+    platforms = ClientPlatformProgress.objects.filter(brand=brand).order_by('platform')
     
     context = {
         'brand': brand,
