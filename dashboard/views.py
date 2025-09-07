@@ -57,7 +57,7 @@ def dashboard_view(request):
             context['business_intel'] = {'partners': [], 'competitors': [], 'notes': ''}
         
         try:
-            context['platform_progress'] = get_platform_progress(request.user)
+            context['platform_progress'] = get_platform_progress(profile)
         except Exception as e:
             print(f"Error getting platform progress: {e}")
             context['platform_progress'] = {'platforms': [], 'platform_names': []}

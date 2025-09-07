@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     'accounts',
     'profiles',
     'dashboard',
+    'manager',
 ]
 
 MIDDLEWARE = [

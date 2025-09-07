@@ -20,7 +20,11 @@ from django.shortcuts import redirect
 
 def home_redirect(request):
     if request.user.is_authenticated:
-        return redirect('dashboard:dashboard')
+        # Redirect admin/staff users to manager dashboard
+        if request.user.is_staff or request.user.is_superuser:
+            return redirect('manager:dashboard')
+        else:
+            return redirect('dashboard:dashboard')
     return redirect('accounts:login')
 
 urlpatterns = [
@@ -32,4 +36,5 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('profiles/', include('profiles.urls')),
     path('dashboard/', include('dashboard.urls')),
+    path('manager/', include('manager.urls')),
 ]

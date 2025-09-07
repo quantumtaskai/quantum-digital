@@ -1,0 +1,242 @@
+{% extends 'manager/base.html' %}
+
+{% block page_title %}Brand Management{% endblock %}
+
+{% block header_actions %}
+<!-- Search Bar -->
+<div class="search-container">
+    <form method="GET" id="searchForm">
+        <div class="position-relative">
+            <i class="fas fa-search search-icon"></i>
+            <input 
+                type="text" 
+                name="search" 
+                value="{{ search_query }}" 
+                placeholder="Filter brands..." 
+                class="search-input"
+                id="searchInput"
+            >
+        </div>
+    </form>
+</div>
+
+<!-- Sort Dropdown -->
+<div class="dropdown">
+    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        <i class="fas fa-sort me-2"></i>
+        {% if sort_by == 'newest' %}Newest first{% elif sort_by == 'oldest' %}Oldest first{% elif sort_by == 'name' %}Name{% endif %}
+    </button>
+    <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="?search={{ search_query }}&sort=newest">Newest first</a></li>
+        <li><a class="dropdown-item" href="?search={{ search_query }}&sort=oldest">Oldest first</a></li>
+        <li><a class="dropdown-item" href="?search={{ search_query }}&sort=name">Name</a></li>
+    </ul>
+</div>
+
+<!-- Create Brand Button -->
+<a href="/admin/profiles/brandprofile/add/" class="btn-primary-custom">
+    <i class="fas fa-plus me-2"></i>
+    Create Brand
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Stats Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="brand-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{{ total_brands }}</h3>
+                    <p class="text-muted mb-0">Total Brands</p>
+                </div>
+                <div class="text-primary">
+                    <i class="fas fa-building fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="brand-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{% for brand in brands %}{{ brand.platform_count|add:0 }}{% endfor %}</h3>
+                    <p class="text-muted mb-0">Active Platforms</p>
+                </div>
+                <div class="text-success">
+                    <i class="fas fa-share-alt fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="brand-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{% for brand in brands %}{{ brand.total_committed|add:0 }}{% endfor %}</h3>
+                    <p class="text-muted mb-0">Content Committed</p>
+                </div>
+                <div class="text-warning">
+                    <i class="fas fa-tasks fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="brand-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{% for brand in brands %}{{ brand.total_published|add:0 }}{% endfor %}</h3>
+                    <p class="text-muted mb-0">Content Published</p>
+                </div>
+                <div class="text-success">
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Brand Cards -->
+{% if brands %}
+    <div class="cards-grid">
+        {% for brand in brands %}
+        <div class="brand-card" onclick="window.location.href='{% url 'manager:brand_detail' brand.id %}'">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">{{ brand.brand_name }}</h3>
+                    <p class="card-subtitle">{{ brand.user.email }}</p>
+                </div>
+                
+                <div class="card-menu">
+                    <button class="menu-btn" data-bs-toggle="dropdown" onclick="event.stopPropagation()">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'manager:brand_detail' brand.id %}">
+                            <i class="fas fa-eye me-2"></i>View Details
+                        </a></li>
+                        <li><a class="dropdown-item" href="/admin/profiles/brandprofile/{{ brand.id }}/change/">
+                            <i class="fas fa-edit me-2"></i>Edit Profile
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'manager:generate_brand_folder' brand.id %}">
+                            <i class="fas fa-download me-2"></i>Download Folder Structure
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="progress-info">
+                    <small class="text-muted">Content Progress</small>
+                    <small class="text-muted">{{ brand.completion_rate }}%</small>
+                </div>
+                <div class="progress-bar-custom">
+                    <div class="progress-fill-custom" style="width: {{ brand.completion_rate }}%;"></div>
+                </div>
+            </div>
+
+            <div class="progress-stats mb-3">
+                <div class="stat">
+                    <i class="fas fa-clipboard-list me-1"></i>
+                    Committed: <strong>{{ brand.total_committed }}</strong>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-check-circle me-1"></i>
+                    Published: <strong>{{ brand.total_published }}</strong>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    {% if brand.platform_count > 0 %}
+                        <span class="status-badge status-active">{{ brand.platform_count }} platform{{ brand.platform_count|pluralize }}</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">No platforms</span>
+                    {% endif %}
+                </div>
+                <small class="text-muted">
+                    Created {{ brand.created_at|date:"M j, Y" }}
+                </small>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-building fa-4x text-muted"></i>
+        </div>
+        <h3 class="text-muted">
+            {% if search_query %}
+                No brands found matching "{{ search_query }}"
+            {% else %}
+                No brands yet
+            {% endif %}
+        </h3>
+        <p class="text-muted">
+            {% if search_query %}
+                Try adjusting your search terms
+            {% else %}
+                Get started by creating your first brand
+            {% endif %}
+        </p>
+        {% if not search_query %}
+        <a href="/admin/profiles/brandprofile/add/" class="btn-primary-custom">
+            <i class="fas fa-plus me-2"></i>
+            Create First Brand
+        </a>
+        {% endif %}
+    </div>
+{% endif %}
+
+<!-- Bulk Actions -->
+{% if brands %}
+<div class="mt-4 p-3 bg-light rounded">
+    <h5>Bulk Actions</h5>
+    <form method="POST" action="{% url 'manager:generate_folder_structure' %}" id="bulkForm">
+        {% csrf_token %}
+        <div class="row align-items-end">
+            <div class="col-md-6">
+                <label class="form-label">Select brands for bulk folder generation:</label>
+                <select name="brand_ids" multiple class="form-select" size="4">
+                    {% for brand in brands %}
+                    <option value="{{ brand.id }}">{{ brand.brand_name }} ({{ brand.user.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <button type="submit" class="btn-primary-custom">
+                    <i class="fas fa-download me-2"></i>
+                    Generate Folder Structures
+                </button>
+                <small class="d-block text-muted mt-2">
+                    Select multiple brands to generate folder structures in a single ZIP file
+                </small>
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit search on typing (with debounce)
+let searchTimeout;
+document.getElementById('searchInput').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() {
+        document.getElementById('searchForm').submit();
+    }, 500);
+});
+
+// Prevent card click when dropdown is clicked
+document.querySelectorAll('.dropdown-toggle').forEach(function(element) {
+    element.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+});
+</script>
+{% endblock %}

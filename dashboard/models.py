@@ -30,7 +30,7 @@ class ClientPlatformProgress(models.Model):
         ('rumble', 'Rumble'),
     ]
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='platform_progress')
+    brand = models.ForeignKey('profiles.BrandProfile', on_delete=models.CASCADE, related_name='platform_progress')
     platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES)
     
     # Content numbers - admin just updates these
@@ -46,12 +46,12 @@ class ClientPlatformProgress(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        unique_together = ['user', 'platform']
+        unique_together = ['brand', 'platform']
         verbose_name = 'Client Platform Progress'
         verbose_name_plural = 'Client Platform Progress'
     
     def __str__(self):
-        return f"{self.user.username} - {self.get_platform_display()}"
+        return f"{self.brand.brand_name} - {self.get_platform_display()}"
     
     @property
     def completion_percentage(self):

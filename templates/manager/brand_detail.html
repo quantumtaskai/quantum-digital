@@ -1,0 +1,197 @@
+{% extends 'manager/base.html' %}
+
+{% block page_title %}{{ brand.brand_name }}{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    <a href="/admin/profiles/brandprofile/{{ brand.id }}/change/" class="btn btn-outline-secondary">
+        <i class="fas fa-edit me-2"></i>
+        Edit Profile
+    </a>
+    <a href="{% url 'manager:generate_brand_folder' brand.id %}" class="btn-primary-custom">
+        <i class="fas fa-download me-2"></i>
+        Download Folder Structure
+    </a>
+    <a href="{% url 'manager:dashboard' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>
+        Back to Dashboard
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Brand Info Card -->
+    <div class="col-md-4">
+        <div class="brand-card">
+            <h4 class="mb-3">Brand Information</h4>
+            
+            <div class="mb-3">
+                <strong>Brand Name:</strong><br>
+                <span class="text-muted">{{ brand.brand_name }}</span>
+            </div>
+            
+            <div class="mb-3">
+                <strong>Primary Contact:</strong><br>
+                <span class="text-muted">{{ brand.primary_contact_first_name }} {{ brand.primary_contact_last_name }}</span><br>
+                <small class="text-muted">{{ brand.primary_official_email }}</small><br>
+                <small class="text-muted">{{ brand.primary_phone_number }}</small>
+            </div>
+            
+            {% if brand.secondary_contact_first_name %}
+            <div class="mb-3">
+                <strong>Secondary Contact:</strong><br>
+                <span class="text-muted">{{ brand.secondary_contact_first_name }} {{ brand.secondary_contact_last_name }}</span><br>
+                <small class="text-muted">{{ brand.secondary_official_email }}</small><br>
+                <small class="text-muted">{{ brand.secondary_phone_number }}</small>
+            </div>
+            {% endif %}
+            
+            <div class="mb-3">
+                <strong>Website:</strong><br>
+                {% if brand.brand_website %}
+                <a href="{{ brand.brand_website }}" target="_blank" class="text-decoration-none">{{ brand.brand_website }}</a>
+                {% else %}
+                <span class="text-muted">Not provided</span>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <strong>Created:</strong><br>
+                <span class="text-muted">{{ brand.created_at|date:"F j, Y" }}</span>
+            </div>
+        </div>
+        
+        <!-- Brand Vision/Mission -->
+        <div class="brand-card mt-3">
+            <h5 class="mb-3">Brand Identity</h5>
+            
+            {% if brand.brand_vision %}
+            <div class="mb-3">
+                <strong>Vision:</strong>
+                <p class="text-muted small">{{ brand.brand_vision }}</p>
+            </div>
+            {% endif %}
+            
+            {% if brand.brand_mission %}
+            <div class="mb-3">
+                <strong>Mission:</strong>
+                <p class="text-muted small">{{ brand.brand_mission }}</p>
+            </div>
+            {% endif %}
+            
+            {% if brand.brand_core_values %}
+            <div class="mb-3">
+                <strong>Core Values:</strong>
+                <p class="text-muted small">{{ brand.brand_core_values }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Platform Progress -->
+    <div class="col-md-8">
+        <div class="brand-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Platform Progress</h4>
+                <div class="d-flex gap-2">
+                    <a href="/admin/dashboard/clientplatformprogress/add/?user={{ brand.user.id }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i>
+                        Add Platform
+                    </a>
+                </div>
+            </div>
+            
+            {% if platforms %}
+                <div class="row">
+                    {% for platform in platforms %}
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">{{ platform.get_platform_display }}</h6>
+                                <a href="/admin/dashboard/clientplatformprogress/{{ platform.id }}/change/" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                            
+                            <div class="progress-stats mb-2">
+                                <div class="stat">
+                                    <small>Committed: <strong>{{ platform.committed }}</strong></small>
+                                </div>
+                                <div class="stat">
+                                    <small>Drafted: <strong>{{ platform.drafted }}</strong></small>
+                                </div>
+                                <div class="stat">
+                                    <small>Published: <strong>{{ platform.published }}</strong></small>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-2">
+                                <div class="progress-bar-custom">
+                                    <div class="progress-fill-custom" style="width: {{ platform.completion_percentage }}%;"></div>
+                                </div>
+                                <small class="text-muted">{{ platform.completion_percentage }}% complete</small>
+                            </div>
+                            
+                            {% if platform.content_links.all %}
+                            <div class="mt-2">
+                                <small class="text-muted">Content Links:</small>
+                                {% for link in platform.content_links.all %}
+                                <div>
+                                    <a href="{{ link.url }}" target="_blank" class="small text-decoration-none">
+                                        <i class="fas fa-external-link-alt me-1"></i>{{ link.title }}
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-share-alt fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No platforms configured</h5>
+                    <p class="text-muted">Add platforms to start tracking content progress</p>
+                    <a href="/admin/dashboard/clientplatformprogress/add/?user={{ brand.user.id }}" class="btn-primary-custom">
+                        <i class="fas fa-plus me-2"></i>
+                        Add First Platform
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="brand-card mt-3">
+            <h5 class="mb-3">Quick Actions</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-grid gap-2">
+                        <a href="/admin/profiles/brandprofile/{{ brand.id }}/change/" class="btn btn-outline-primary">
+                            <i class="fas fa-user-edit me-2"></i>
+                            Edit Brand Profile
+                        </a>
+                        <a href="/admin/dashboard/clientplatformprogress/?user__id__exact={{ brand.user.id }}" class="btn btn-outline-success">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Manage All Platforms
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'manager:generate_brand_folder' brand.id %}" class="btn btn-outline-warning">
+                            <i class="fas fa-folder-plus me-2"></i>
+                            Generate Folder Structure
+                        </a>
+                        <a href="/dashboard/" class="btn btn-outline-info">
+                            <i class="fas fa-eye me-2"></i>
+                            Preview Client Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
