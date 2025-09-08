@@ -25,14 +25,12 @@ def home_redirect(request):
             return redirect('manager:dashboard')
         else:
             return redirect('dashboard:dashboard')
-    return redirect('accounts:login')
+    return redirect('account_login')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_redirect, name='home'),
-    # Custom accounts URLs first (login/signup templates)
-    path('accounts/', include('accounts.urls')),
-    # Allauth social auth URLs (for OAuth callbacks)
+    # Allauth URLs (includes login/signup with our custom templates)
     path('accounts/', include('allauth.urls')),
     path('profiles/', include('profiles.urls')),
     path('dashboard/', include('dashboard.urls')),

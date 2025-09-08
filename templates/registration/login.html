@@ -431,7 +431,7 @@
                     {% for provider in socialaccount_providers %}
                         {% if provider.id == "google" %}
                             <a href="{% provider_login_url 'google' %}" class="google-signin-btn">
-                                <img src="{% static 'images/social-icons/light/web_light_rd_ctn.svg' %}" alt="Continue with Google" style="height: 46px; width: auto; border-radius: 8px; transition: all 0.2s ease;">
+                                <img src="{% static 'images/social-icons/light/web_light_rd_ctn.svg' %}" alt="Continue with Google" style="height: 36px; width: auto; border-radius: 6px; transition: all 0.2s ease;">
                             </a>
                         {% elif provider.id == "facebook" %}
                             <a href="{% provider_login_url 'facebook' %}" class="social-btn social-btn-facebook">
@@ -455,7 +455,7 @@
         </div>
 
         <div class="login-footer">
-            <a href="{% url 'accounts:signup' %}" class="btn-login-secondary">
+            <a href="{% url 'account_signup' %}" class="btn-login-secondary">
                 Don't have an account? Create one
             </a>
         </div>

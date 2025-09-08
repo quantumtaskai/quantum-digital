@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+{% load static %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #000000;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .signup-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background: #000000;
+    }
+    
+    .signup-form {
+        width: 100%;
+        max-width: 480px;
+    }
+    
+    .signup-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .signup-header h1 {
+        color: #ffffff;
+        font-size: 1.5rem;
+        font-weight: 500;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .signup-header p {
+        color: #8e8e93;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-label {
+        display: block;
+        color: #ffffff;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.6rem 0.875rem;
+        background: #1c1c1e;
+        border: 1px solid #3a3a3c;
+        border-radius: 6px;
+        color: #ffffff;
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease;
+    }
+    
+    .form-input::placeholder {
+        color: #8e8e93;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #007aff;
+    }
+    
+    .signup-button {
+        width: 100%;
+        padding: 0.7rem;
+        background: #ffffff;
+        color: #000000;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        margin-bottom: 1.5rem;
+        transition: background-color 0.2s ease;
+    }
+    
+    .signup-button:hover {
+        background: #f2f2f7;
+    }
+    
+    .social-login {
+        padding-top: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .social-login-title {
+        text-align: center;
+        color: #8e8e93;
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .social-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .social-button {
+        display: block;
+        text-decoration: none;
+        transition: transform 0.2s ease;
+    }
+    
+    .social-button:hover {
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+    
+    .social-button img {
+        width: auto;
+        height: 46px;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .error-message {
+        color: #ff453a;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+    
+    .error-list {
+        color: #ff453a;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        list-style: none;
+        padding: 0;
+    }
+    
+    .error-list li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .login-link {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #3a3a3c;
+    }
+    
+    .login-link p {
+        color: #8e8e93;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .login-link a {
+        color: #007aff;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+    
+    @media (max-width: 480px) {
+        .signup-container {
+            padding: 1rem;
+        }
+        
+        .signup-form {
+            max-width: 100%;
+            margin: 0 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="signup-container">
+    <div class="signup-form">
+        <div class="signup-header">
+            <h1>Create Account</h1>
+            <p>Sign up to get started</p>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="id_email" class="form-label">Email</label>
+                <input type="email" 
+                       id="id_email" 
+                       name="email" 
+                       class="form-input"
+                       placeholder="john@example.com"
+                       value="{{ form.email.value|default:'' }}"
+                       required>
+                {% if form.email.errors %}
+                    <div class="error-message">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password1" class="form-label">Password</label>
+                <input type="password" 
+                       id="id_password1" 
+                       name="password1" 
+                       class="form-input"
+                       placeholder="Create a password"
+                       required>
+                {% if form.password1.errors %}
+                    <ul class="error-list">
+                        {% for error in form.password1.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password2" class="form-label">Confirm Password</label>
+                <input type="password" 
+                       id="id_password2" 
+                       name="password2" 
+                       class="form-input"
+                       placeholder="Confirm your password"
+                       required>
+                {% if form.password2.errors %}
+                    <div class="error-message">{{ form.password2.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            {% if form.non_field_errors %}
+                <div class="error-message" style="margin-bottom: 1rem;">
+                    {{ form.non_field_errors.0 }}
+                </div>
+            {% endif %}
+            
+            <button type="submit" class="signup-button">Create Account</button>
+        </form>
+        
+        <!-- Social Login -->
+        {% get_providers as socialaccount_providers %}
+        {% if socialaccount_providers %}
+        <div class="social-login">
+            <div class="social-login-title">Or sign up with</div>
+            <div class="social-buttons">
+                {% for provider in socialaccount_providers %}
+                    {% if provider.id == "google" %}
+                        <a href="{% provider_login_url 'google' %}" class="social-button">
+                            <img src="{% static 'images/google/web_light_rd_SU.svg' %}" alt="Sign up with Google">
+                        </a>
+                    {% elif provider.id == "facebook" %}
+                        <a href="{% provider_login_url 'facebook' %}" class="social-button">
+                            <span style="color: #1877f2; margin-right: 0.75rem;">📘</span>
+                            <span>Sign up with Facebook</span>
+                        </a>
+                    {% elif provider.id == "github" %}
+                        <a href="{% provider_login_url 'github' %}" class="social-button">
+                            <span style="color: #333; margin-right: 0.75rem;">🐙</span>
+                            <span>Sign up with GitHub</span>
+                        </a>
+                    {% elif provider.id == "linkedin_oauth2" %}
+                        <a href="{% provider_login_url 'linkedin_oauth2' %}" class="social-button">
+                            <span style="color: #0077b5; margin-right: 0.75rem;">💼</span>
+                            <span>Sign up with LinkedIn</span>
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="login-link">
+            <p>Already have an account? <a href="{% url 'account_login' %}">Sign in</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
