@@ -19,7 +19,11 @@ def onboarding_view(request):
             profile = form.save(commit=False)
             profile.user = request.user
             profile.save()
-            messages.success(request, 'Welcome! Your brand profile has been created successfully.')
+            
+            # Auto-create platform progress records for all platforms
+            created_count = profile.create_default_platform_records()
+            
+            messages.success(request, f'Welcome! Your brand profile has been created successfully. {created_count} platform progress records have been initialized.')
             return redirect('dashboard:dashboard')
     else:
         form = BrandProfileForm()

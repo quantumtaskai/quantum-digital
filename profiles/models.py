@@ -87,6 +87,36 @@ class BrandProfile(models.Model):
             self.public_uuid = uuid.uuid4()
             self.save(update_fields=['public_uuid'])
         return self.public_uuid
+    
+    def create_default_platform_records(self):
+        """Create ClientPlatformProgress records for all available platforms"""
+        from dashboard.models import ClientPlatformProgress
+        
+        # Get all platform choices
+        platforms_to_create = []
+        existing_platforms = set(
+            ClientPlatformProgress.objects.filter(brand=self).values_list('platform', flat=True)
+        )
+        
+        # Create records for platforms that don't exist yet
+        for platform_code, platform_name in ClientPlatformProgress.PLATFORM_CHOICES:
+            if platform_code not in existing_platforms:
+                platforms_to_create.append(
+                    ClientPlatformProgress(
+                        brand=self,
+                        platform=platform_code,
+                        committed=0,
+                        drafted=0,
+                        published=0,
+                        notes=f"Auto-created for {platform_name}"
+                    )
+                )
+        
+        # Bulk create all missing platform records
+        if platforms_to_create:
+            ClientPlatformProgress.objects.bulk_create(platforms_to_create)
+            return len(platforms_to_create)
+        return 0
 
     class Meta:
         verbose_name = "Brand Profile"

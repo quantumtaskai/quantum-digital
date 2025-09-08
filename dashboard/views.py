@@ -205,48 +205,32 @@ def get_platform_progress(user):
     try:
         from profiles.models import BrandProfile
         brand = BrandProfile.objects.get(user=user)
-        existing_progress = ClientPlatformProgress.objects.filter(brand=brand)
-    except BrandProfile.DoesNotExist:
-        existing_progress = ClientPlatformProgress.objects.none()
-    existing_platforms = {p.platform: p for p in existing_progress}
-    
-    # Create full platform list with defaults for missing ones
-    all_platforms = []
-    platform_names = []
-    
-    for platform_code, platform_name in ClientPlatformProgress.PLATFORM_CHOICES:
-        if platform_code in existing_platforms:
-            # Use existing data
-            progress = existing_platforms[platform_code]
-        else:
-            # Create default data structure (not saved to DB)
-            class DefaultProgress:
-                def __init__(self, platform_code, platform_name):
-                    self.platform = platform_code
-                    self.committed = 0
-                    self.drafted = 0
-                    self.published = 0
-                    self.completion_percentage = 0
-                    self.content_links = type('MockManager', (), {'all': lambda: []})()
-                
-                def get_platform_display(self):
-                    return dict(ClientPlatformProgress.PLATFORM_CHOICES)[self.platform]
-            
-            progress = DefaultProgress(platform_code, platform_name)
+        all_platforms = ClientPlatformProgress.objects.filter(brand=brand).order_by('platform')
         
-        all_platforms.append(progress)
-        platform_names.append(platform_code)
+        # Ensure all platforms exist (auto-create if missing for existing brands)
+        if all_platforms.count() < len(ClientPlatformProgress.PLATFORM_CHOICES):
+            created_count = brand.create_default_platform_records()
+            if created_count > 0:
+                # Re-fetch after creating missing records
+                all_platforms = ClientPlatformProgress.objects.filter(brand=brand).order_by('platform')
+                
+    except BrandProfile.DoesNotExist:
+        all_platforms = ClientPlatformProgress.objects.none()
     
-    # Calculate totals from existing progress only
-    total_committed = sum(p.committed for p in existing_progress)
-    total_drafted = sum(p.drafted for p in existing_progress)
-    total_published = sum(p.published for p in existing_progress)
+    # Convert to list and extract platform names
+    all_platforms = list(all_platforms)
+    platform_names = [p.platform for p in all_platforms]
+    
+    # Calculate totals from all platforms
+    total_committed = sum(p.committed for p in all_platforms)
+    total_drafted = sum(p.drafted for p in all_platforms)
+    total_published = sum(p.published for p in all_platforms)
     completion_rate = (total_published / total_committed * 100) if total_committed > 0 else 0
     
     # Calculate chart-specific metrics for pie chart
-    active_platforms_count = sum(1 for p in existing_progress if p.committed > 0)
-    inactive_platforms_count = len(ClientPlatformProgress.PLATFORM_CHOICES) - len(existing_progress)
-    in_progress_count = sum(1 for p in existing_progress if p.drafted > 0 and p.published < p.committed)
+    active_platforms_count = sum(1 for p in all_platforms if p.committed > 0)
+    inactive_platforms_count = sum(1 for p in all_platforms if p.committed == 0)
+    in_progress_count = sum(1 for p in all_platforms if p.drafted > 0 and p.published < p.committed)
     
     return {
         'platforms': all_platforms,
