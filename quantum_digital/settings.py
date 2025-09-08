@@ -194,6 +194,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Allauth Settings
+ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
