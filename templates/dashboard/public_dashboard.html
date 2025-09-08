@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ brand_name }} - Digital Marketing Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* Global Dark Theme Variables */
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #1a1f3a;
+            --bg-tertiary: #2a2f4a;
+            --bg-card: #1e2340;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b6d3;
+            --text-muted: #6b7093;
+            --accent-primary: #00d4ff;
+            --accent-success: #00e676;
+            --accent-warning: #ff9800;
+            --accent-danger: #ff5252;
+            --accent-inactive: #424769;
+            --border-color: #2d3247;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .public-header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px var(--shadow-color);
+            text-align: center;
+        }
+
+        .public-header h1 {
+            color: var(--accent-primary);
+            font-weight: 800;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .public-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+
+        .main-content {
+            padding: 2rem 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 25px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px var(--shadow-color);
+            border-color: var(--accent-primary);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .metric-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .section-title {
+            color: var(--text-primary);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 3rem 0 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 2rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
+            border-radius: 2px;
+        }
+
+
+        /* Content Progress Enhanced */
+        .content-progress-section {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            margin: -1rem;
+        }
+        
+        .progress-header {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .progress-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .progress-metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .progress-metric-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        
+        .progress-metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .progress-metric-value.committed { color: var(--accent-primary); }
+        .progress-metric-value.drafted { color: var(--accent-warning); }
+        .progress-metric-value.published { color: var(--accent-success); }
+        
+        .platform-grid-enhanced {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .platform-card-enhanced {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .platform-card-enhanced:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-color);
+            border-color: var(--accent-primary);
+        }
+        
+        .platform-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .platform-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .platform-status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .status-active { background: var(--accent-success); color: white; }
+        .status-inactive { background: var(--accent-danger); color: white; }
+        .status-not-available { background: var(--accent-warning); color: white; }
+        
+        .platform-category {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+        
+        .progress-bar-enhanced {
+            background: var(--bg-primary);
+            height: 8px;
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-success));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .content-links-section {
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .content-link-btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--accent-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin: 0.25rem 0.25rem 0.25rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .content-link-btn:hover {
+            background: var(--accent-success);
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 3rem 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+            color: var(--text-muted);
+        }
+
+        .footer .brand {
+            color: var(--accent-primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .footer .brand:hover {
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        /* Header Metrics */
+        .header-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-color);
+            border-color: var(--accent-primary);
+        }
+
+        .metric-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .metric-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 8px 25px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px var(--shadow-color);
+            border-color: var(--accent-primary);
+        }
+
+        .card-header {
+            background: var(--bg-secondary);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 16px 16px 0 0;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header i {
+            color: var(--accent-primary);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Chart Components */
+        .chart-container {
+            max-width: 300px;
+            margin: 0 auto 1rem auto;
+            height: 300px;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.active {
+            background: var(--accent-success);
+        }
+
+        .legend-dot.inactive {
+            background: var(--accent-danger);
+        }
+
+        .legend-dot.in-progress {
+            background: var(--accent-warning);
+        }
+
+        /* Content Metrics */
+        .content-metrics {
+            text-align: center;
+        }
+
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-large {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .metric-large .number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-primary);
+        }
+
+        .metric-large .label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .platform-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .platform-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+        }
+
+        .platform-metric .platform-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .platform-metric .platform-stats {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Platform Details Grid */
+        .platform-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .platform-detail-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .platform-detail-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px var(--shadow-color);
+            border-color: var(--accent-primary);
+        }
+
+        .platform-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.active {
+            background: var(--accent-success);
+            color: white;
+        }
+
+        .status-badge.not-active {
+            background: var(--accent-danger);
+            color: white;
+        }
+
+        .platform-stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .platform-category,
+        .primary-content,
+        .content-created {
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .content-links {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .content-link {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--accent-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .content-link:hover {
+            background: var(--accent-success);
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .public-header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+            
+            .metric-card {
+                padding: 1.5rem;
+            }
+            
+            .header-metrics {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .metric-item {
+                padding: 1rem;
+            }
+            
+            .metric-number {
+                font-size: 1.5rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .dashboard-card {
+                margin-bottom: 1rem;
+            }
+            
+            .metrics-row {
+                grid-template-columns: repeat(1, 1fr);
+                gap: 0.75rem;
+            }
+            
+            .platform-details-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .platform-stats-row {
+                grid-template-columns: repeat(1, 1fr);
+                gap: 0.5rem;
+            }
+            
+            .stat-item {
+                padding: 0.5rem;
+            }
+            
+            .chart-container {
+                max-width: 250px;
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Public Header -->
+    <header class="public-header">
+        <div class="container">
+            <h1>{{ brand_name }}</h1>
+            <p>Digital Marketing Dashboard</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header Metrics -->
+        <div class="header-metrics">
+            <div class="metric-item">
+                <div class="metric-number">{{ platform_progress.active_platforms_count|add:platform_progress.inactive_platforms_count|default:0 }}</div>
+                <div class="metric-title">Total Platforms</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-number">{{ platform_progress.active_platforms_count|default:0 }}</div>
+                <div class="metric-title">Active</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-number">{{ platform_progress.total_committed|default:1030 }}</div>
+                <div class="metric-title">Content Committed</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-number">{{ platform_progress.total_drafted|default:109 }}</div>
+                <div class="metric-title">Total Drafted</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Content Grid -->
+        <div class="dashboard-grid">
+            <!-- Platform Status Overview -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie"></i>
+                    Platform Status Overview
+                </div>
+                <div class="card-content">
+                    <div class="chart-container">
+                        <canvas id="platformChart" width="300" height="300"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <span class="legend-dot active"></span>
+                            Active
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot inactive"></span>
+                            Inactive
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot in-progress"></span>
+                            In Progress
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Metrics -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar"></i>
+                    Content Metrics
+                </div>
+                <div class="card-content">
+                    <div class="content-metrics">
+                        <div class="metrics-row">
+                            <div class="metric-large">
+                                <span class="number">{{ platform_progress.total_committed|default:1030 }}</span>
+                                <span class="label">Committed</span>
+                            </div>
+                            <div class="metric-large">
+                                <span class="number">{{ platform_progress.total_drafted|default:109 }}</span>
+                                <span class="label">Drafted</span>
+                            </div>
+                            <div class="metric-large">
+                                <span class="number">{{ platform_progress.completion_rate|default:11 }}%</span>
+                                <span class="label">Rate</span>
+                            </div>
+                        </div>
+                        <div class="platform-metrics">
+                            <div class="platform-metric">
+                                <span class="platform-name">Instagram</span>
+                                <span class="platform-stats">160C : 10D</span>
+                            </div>
+                            <div class="platform-metric">
+                                <span class="platform-name">Pinterest</span>
+                                <span class="platform-stats">130C : 0D</span>
+                            </div>
+                            <div class="platform-metric">
+                                <span class="platform-name">X (Twitter)</span>
+                                <span class="platform-stats">180C : 10D</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platform Details -->
+        <div class="dashboard-card full-width">
+            <div class="card-header">
+                <i class="fas fa-list"></i>
+                Platform Details
+            </div>
+            <div class="card-content">
+                <div class="platform-details-grid">
+                    {% if platform_progress.platforms %}
+                        {% for progress in platform_progress.platforms %}
+                        <div class="platform-detail-card">
+                            <div class="platform-title">
+                                {{ progress.get_platform_display }}
+                                <span class="status-badge {% if progress.committed > 0 %}active{% else %}not-active{% endif %}">
+                                    {% if progress.committed > 0 %}ACTIVE{% else %}NOT ACTIVE{% endif %}
+                                </span>
+                            </div>
+                            
+                            <div class="platform-stats-row">
+                                <div class="stat-item">
+                                    <span class="stat-label">Committed</span>
+                                    <span class="stat-value">{{ progress.committed }}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Drafted</span>
+                                    <span class="stat-value">{{ progress.drafted }}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Published</span>
+                                    <span class="stat-value">{{ progress.published }}</span>
+                                </div>
+                            </div>
+
+                            <div class="platform-category">
+                                <strong>Category:</strong>
+                                {% if progress.platform == 'website_blogs' or progress.platform == 'medium' %}Professional Writing
+                                {% elif progress.platform == 'instagram' or progress.platform == 'pinterest' %}Visual Content
+                                {% elif progress.platform == 'youtube' or progress.platform == 'tiktok' %}Video Content
+                                {% elif progress.platform == 'twitter' or progress.platform == 'threads' %}Real-Time Social
+                                {% elif progress.platform == 'linkedin' %}Professional Network
+                                {% elif progress.platform == 'facebook' %}Social Community
+                                {% else %}Digital Platform
+                                {% endif %}
+                            </div>
+
+                            {% if progress.content_links.all %}
+                            <div class="content-created">
+                                <strong>Content Created:</strong>
+                                <div class="content-links">
+                                    {% for link in progress.content_links.all %}
+                                    <a href="{{ link.url }}" target="_blank" class="content-link">{{ link.title }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="primary-content">
+                                <strong>Primary Content:</strong>
+                                {% if progress.platform == 'website_blogs' %}Long-form Articles, Thought Leadership
+                                {% elif progress.platform == 'instagram' %}Images, Stories, Reels, IGTV
+                                {% elif progress.platform == 'youtube' %}Long-form Videos, Tutorials, Vlogs
+                                {% elif progress.platform == 'linkedin' %}Articles, Company Updates, Industry News
+                                {% elif progress.platform == 'twitter' %}Real-time Updates, News, Discussions
+                                {% elif progress.platform == 'facebook' %}Mixed Content, Community Posts, Events
+                                {% elif progress.platform == 'pinterest' %}Infographics, Product Images, Boards
+                                {% else %}Digital Content
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Default platforms when no progress data -->
+                        <div class="platform-detail-card">
+                            <div class="platform-title">
+                                Website- blogs
+                                <span class="status-badge not-active">NOT ACTIVE</span>
+                            </div>
+                            <div class="platform-stats-row">
+                                <div class="stat-item">
+                                    <span class="stat-label">Committed</span>
+                                    <span class="stat-value">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Drafted</span>
+                                    <span class="stat-value">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Published</span>
+                                    <span class="stat-value">0</span>
+                                </div>
+                            </div>
+                            <div class="platform-category"><strong>Category:</strong> Professional Writing</div>
+                            <div class="primary-content"><strong>Primary Content:</strong> Long-form Articles, Thought Leadership</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Powered by <a href="https://quantumtaskai.com" class="brand" target="_blank">Quantum Digital</a></p>
+            <p><small>Professional Digital Marketing Solutions</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Initialize Platform Status Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('platformChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active', 'Inactive', 'In Progress'],
+                        datasets: [{
+                            data: [{{ platform_progress.active_platforms_count|default:0 }}, {{ platform_progress.inactive_platforms_count|default:0 }}, {{ platform_progress.in_progress_count|default:0 }}],
+                            backgroundColor: [
+                                '#00e676',  // Active - success green
+                                '#ff5252',  // Inactive - danger red
+                                '#ff9800'   // Already in place - warning orange
+                            ],
+                            borderColor: '#1e2340',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false // Using custom legend
+                            },
+                            tooltip: {
+                                backgroundColor: '#1e2340',
+                                titleColor: '#ffffff',
+                                bodyColor: '#b0b6d3',
+                                borderColor: '#00d4ff',
+                                borderWidth: 1
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

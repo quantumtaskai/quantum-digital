@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from profiles.models import BrandProfile
 from .models import ClientPlatformProgress
 import re
@@ -57,10 +58,20 @@ def dashboard_view(request):
             context['business_intel'] = {'partners': [], 'competitors': [], 'notes': ''}
         
         try:
-            context['platform_progress'] = get_platform_progress(profile)
+            context['platform_progress'] = get_platform_progress(profile.user)
         except Exception as e:
             print(f"Error getting platform progress: {e}")
-            context['platform_progress'] = {'platforms': [], 'platform_names': []}
+            context['platform_progress'] = {
+                'platforms': [], 
+                'platform_names': [],
+                'total_committed': 0,
+                'total_drafted': 0,
+                'total_published': 0,
+                'completion_rate': 0,
+                'active_platforms_count': 0,
+                'inactive_platforms_count': 0,
+                'in_progress_count': 0,
+            }
         
         return render(request, 'dashboard/dashboard.html', context)
         
@@ -78,7 +89,17 @@ def dashboard_view(request):
             'kpis': {},
             'swot': {'strengths': [], 'weaknesses': [], 'opportunities': [], 'threats': []},
             'business_intel': {'partners': [], 'competitors': [], 'notes': ''},
-            'platform_progress': {'platforms': [], 'platform_names': []},
+            'platform_progress': {
+                'platforms': [], 
+                'platform_names': [],
+                'total_committed': 0,
+                'total_drafted': 0,
+                'total_published': 0,
+                'completion_rate': 0,
+                'active_platforms_count': 0,
+                'inactive_platforms_count': 0,
+                'in_progress_count': 0,
+            },
         })
 
 
@@ -98,6 +119,7 @@ def calculate_metrics(profile):
     return {
         'total_platforms': total_platforms,
         'active_platforms': active_platforms,
+        'inactive_platforms': total_platforms - active_platforms,
         'total_content_per_week': total_content_per_week,
         'posts_per_week': posts_per_week,
         'videos_per_week': videos_per_week,
@@ -179,8 +201,13 @@ def get_business_intelligence(profile):
 
 def get_platform_progress(user):
     """Get platform progress data from admin updates"""
-    # Get existing progress records
-    existing_progress = ClientPlatformProgress.objects.filter(user=user)
+    # Get existing progress records - need to get brand first, then filter by brand
+    try:
+        from profiles.models import BrandProfile
+        brand = BrandProfile.objects.get(user=user)
+        existing_progress = ClientPlatformProgress.objects.filter(brand=brand)
+    except BrandProfile.DoesNotExist:
+        existing_progress = ClientPlatformProgress.objects.none()
     existing_platforms = {p.platform: p for p in existing_progress}
     
     # Create full platform list with defaults for missing ones
@@ -216,6 +243,11 @@ def get_platform_progress(user):
     total_published = sum(p.published for p in existing_progress)
     completion_rate = (total_published / total_committed * 100) if total_committed > 0 else 0
     
+    # Calculate chart-specific metrics for pie chart
+    active_platforms_count = sum(1 for p in existing_progress if p.committed > 0)
+    inactive_platforms_count = len(ClientPlatformProgress.PLATFORM_CHOICES) - len(existing_progress)
+    in_progress_count = sum(1 for p in existing_progress if p.drafted > 0 and p.published < p.committed)
+    
     return {
         'platforms': all_platforms,
         'platform_names': platform_names,
@@ -223,6 +255,9 @@ def get_platform_progress(user):
         'total_drafted': total_drafted,
         'total_published': total_published,
         'completion_rate': round(completion_rate, 1),
+        'active_platforms_count': active_platforms_count,
+        'inactive_platforms_count': inactive_platforms_count,
+        'in_progress_count': in_progress_count,
     }
 
 
@@ -239,3 +274,108 @@ def parse_list_field(field_text):
     if not field_text:
         return []
     return [item.strip() for item in field_text.split('\n') if item.strip()]
+
+
+def public_dashboard_view(request, uuid):
+    """Public dashboard view - accessible without login via UUID"""
+    try:
+        profile = get_object_or_404(BrandProfile, public_uuid=uuid)
+        
+        # Check if public access is enabled
+        if not profile.is_public_enabled:
+            raise Http404("Public access to this dashboard is not enabled")
+        
+        # Use the same data processing as regular dashboard
+        try:
+            context = {
+                'profile': profile,
+                'brand_name': getattr(profile, 'brand_name', 'Unknown Brand'),
+                'is_public_view': True,  # Flag to indicate this is public view
+            }
+            
+            # Add each context item with error handling (same as regular dashboard)
+            try:
+                context['metrics'] = calculate_metrics(profile)
+            except Exception as e:
+                print(f"Error calculating metrics: {e}")
+                context['metrics'] = {'total_platforms': 0, 'active_platforms': 0}
+            
+            try:
+                context['platforms'] = get_platform_data(profile)
+            except Exception as e:
+                print(f"Error getting platform data: {e}")
+                context['platforms'] = {}
+            
+            try:
+                context['social_platforms'] = get_social_platforms(profile)
+            except Exception as e:
+                print(f"Error getting social platforms: {e}")
+                context['social_platforms'] = []
+            
+            try:
+                context['kpis'] = get_kpis(profile)
+            except Exception as e:
+                print(f"Error getting KPIs: {e}")
+                context['kpis'] = {}
+            
+            try:
+                context['swot'] = get_swot_analysis(profile)
+            except Exception as e:
+                print(f"Error getting SWOT: {e}")
+                context['swot'] = {'strengths': [], 'weaknesses': [], 'opportunities': [], 'threats': []}
+            
+            try:
+                context['business_intel'] = get_business_intelligence(profile)
+            except Exception as e:
+                print(f"Error getting business intel: {e}")
+                context['business_intel'] = {'partners': [], 'competitors': [], 'notes': ''}
+            
+            try:
+                # For public dashboard, pass the user from the profile
+                context['platform_progress'] = get_platform_progress(profile.user)
+            except Exception as e:
+                print(f"Error getting platform progress: {e}")
+                context['platform_progress'] = {
+                    'platforms': [], 
+                    'platform_names': [],
+                    'total_committed': 0,
+                    'total_drafted': 0,
+                    'total_published': 0,
+                    'completion_rate': 0,
+                    'active_platforms_count': 0,
+                    'inactive_platforms_count': 0,
+                    'in_progress_count': 0,
+                }
+            
+            return render(request, 'dashboard/public_dashboard.html', context)
+            
+        except Exception as e:
+            print(f"Public dashboard view error: {e}")
+            import traceback
+            print(traceback.format_exc())
+            # Return a minimal context to prevent total failure
+            return render(request, 'dashboard/public_dashboard.html', {
+                'profile': profile,
+                'brand_name': getattr(profile, 'brand_name', 'Unknown Brand'),
+                'is_public_view': True,
+                'metrics': {'total_platforms': 0, 'active_platforms': 0},
+                'platforms': {},
+                'social_platforms': [],
+                'kpis': {},
+                'swot': {'strengths': [], 'weaknesses': [], 'opportunities': [], 'threats': []},
+                'business_intel': {'partners': [], 'competitors': [], 'notes': ''},
+                'platform_progress': {
+                    'platforms': [], 
+                    'platform_names': [],
+                    'total_committed': 0,
+                    'total_drafted': 0,
+                    'total_published': 0,
+                    'completion_rate': 0,
+                    'active_platforms_count': 0,
+                    'inactive_platforms_count': 0,
+                    'in_progress_count': 0,
+                },
+            })
+            
+    except BrandProfile.DoesNotExist:
+        raise Http404("Public dashboard not found")

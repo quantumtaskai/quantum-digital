@@ -4,6 +4,8 @@ from django.db.models import Q, Count, Sum
 from django.http import JsonResponse
 from profiles.models import BrandProfile
 from dashboard.models import ClientPlatformProgress
+from django.utils import timezone
+from django.urls import reverse
 import zipfile
 import io
 import os
@@ -157,3 +159,91 @@ Created by Quantum Digital Manager Dashboard
     
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
+
+@user_passes_test(is_staff_user)
+def generate_public_link(request, brand_id):
+    """Generate or retrieve public dashboard link for a brand"""
+    brand = get_object_or_404(BrandProfile, id=brand_id)
+    
+    if request.method == 'POST':
+        # Generate UUID if not exists
+        if not brand.public_uuid:
+            brand.generate_public_uuid()
+        
+        # Enable public access and track who enabled it
+        brand.is_public_enabled = True
+        brand.public_link_created_by = request.user
+        if not brand.public_link_created_at:
+            brand.public_link_created_at = timezone.now()
+        brand.save(update_fields=['is_public_enabled', 'public_link_created_by', 'public_link_created_at'])
+        
+        # Build full URL for the public dashboard
+        public_url = request.build_absolute_uri(
+            reverse('dashboard:public_dashboard', kwargs={'uuid': brand.public_uuid})
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'public_url': public_url,
+            'uuid': str(brand.public_uuid),
+            'enabled_at': brand.public_link_created_at.isoformat(),
+            'enabled_by': brand.public_link_created_by.username
+        })
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+@user_passes_test(is_staff_user)
+def toggle_public_access(request, brand_id):
+    """Toggle public dashboard access for a brand"""
+    brand = get_object_or_404(BrandProfile, id=brand_id)
+    
+    if request.method == 'POST':
+        brand.is_public_enabled = not brand.is_public_enabled
+        
+        if brand.is_public_enabled:
+            # Generate UUID if enabling and doesn't exist
+            if not brand.public_uuid:
+                brand.generate_public_uuid()
+            if not brand.public_link_created_at:
+                brand.public_link_created_at = timezone.now()
+            brand.public_link_created_by = request.user
+        
+        brand.save(update_fields=['is_public_enabled', 'public_link_created_by', 'public_link_created_at'])
+        
+        return JsonResponse({
+            'success': True,
+            'is_enabled': brand.is_public_enabled,
+            'public_uuid': str(brand.public_uuid) if brand.public_uuid else None
+        })
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+@user_passes_test(is_staff_user)
+def regenerate_public_uuid(request, brand_id):
+    """Regenerate UUID for public dashboard link (revokes old link)"""
+    brand = get_object_or_404(BrandProfile, id=brand_id)
+    
+    if request.method == 'POST':
+        # Force generate new UUID
+        import uuid
+        brand.public_uuid = uuid.uuid4()
+        brand.public_link_created_by = request.user
+        brand.public_link_created_at = timezone.now()
+        brand.save(update_fields=['public_uuid', 'public_link_created_by', 'public_link_created_at'])
+        
+        # Build new public URL
+        public_url = request.build_absolute_uri(
+            reverse('dashboard:public_dashboard', kwargs={'uuid': brand.public_uuid})
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'public_url': public_url,
+            'uuid': str(brand.public_uuid),
+            'regenerated_at': brand.public_link_created_at.isoformat()
+        })
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=400)

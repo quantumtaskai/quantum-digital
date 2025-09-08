@@ -87,6 +87,76 @@
             </div>
             {% endif %}
         </div>
+        
+        <!-- Public Dashboard Section -->
+        <div class="brand-card mt-3">
+            <h5 class="mb-3">
+                <i class="fas fa-share-alt me-2"></i>
+                Public Dashboard
+            </h5>
+            
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span><strong>Public Access:</strong></span>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="publicToggle" 
+                               {% if brand.is_public_enabled %}checked{% endif %}
+                               onchange="togglePublicAccess({{ brand.id }})">
+                        <label class="form-check-label" for="publicToggle">
+                            <span id="toggleLabel">{{ brand.is_public_enabled|yesno:"Enabled,Disabled" }}</span>
+                        </label>
+                    </div>
+                </div>
+                
+                {% if brand.is_public_enabled and brand.public_uuid %}
+                <div id="publicLinkSection" class="mt-3">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="publicLinkInput" 
+                               value="{{ request.scheme }}://{{ request.get_host }}{% url 'dashboard:public_dashboard' brand.public_uuid %}"
+                               readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyPublicLink()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-success" onclick="openPublicDashboard()">
+                            <i class="fas fa-external-link-alt me-1"></i>
+                            Preview
+                        </button>
+                        <button class="btn btn-sm btn-warning" onclick="regenerateLink({{ brand.id }})">
+                            <i class="fas fa-sync me-1"></i>
+                            Regenerate Link
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                <div id="publicLinkSection" style="display: none;">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="publicLinkInput" readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyPublicLink()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-success" onclick="openPublicDashboard()">
+                            <i class="fas fa-external-link-alt me-1"></i>
+                            Preview
+                        </button>
+                        <button class="btn btn-sm btn-warning" onclick="regenerateLink({{ brand.id }})">
+                            <i class="fas fa-sync me-1"></i>
+                            Regenerate Link
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if brand.public_link_created_at %}
+                <small class="text-muted">
+                    Created by {{ brand.public_link_created_by.username }} on {{ brand.public_link_created_at|date:"M j, Y" }}
+                </small>
+                {% endif %}
+            </div>
+        </div>
     </div>
     
     <!-- Platform Progress -->
@@ -194,4 +264,157 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// CSRF Token for AJAX requests
+function getCSRFToken() {
+    const token = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (token) {
+        return token.value;
+    }
+    // Fallback: get from cookie
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') {
+            return value;
+        }
+    }
+    return '';
+}
+
+// Toggle public access
+async function togglePublicAccess(brandId) {
+    const toggle = document.getElementById('publicToggle');
+    const label = document.getElementById('toggleLabel');
+    const linkSection = document.getElementById('publicLinkSection');
+    
+    try {
+        const response = await fetch(`/manager/brand/${brandId}/toggle-public-access/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            label.textContent = data.is_enabled ? 'Enabled' : 'Disabled';
+            
+            if (data.is_enabled) {
+                if (data.public_uuid) {
+                    // Generate the full public URL
+                    const publicUrl = `${window.location.protocol}//${window.location.host}/dashboard/public/${data.public_uuid}/`;
+                    document.getElementById('publicLinkInput').value = publicUrl;
+                }
+                linkSection.style.display = 'block';
+            } else {
+                linkSection.style.display = 'none';
+            }
+        } else {
+            // Revert toggle on error
+            toggle.checked = !toggle.checked;
+            alert('Error updating public access');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        toggle.checked = !toggle.checked;
+        alert('Error updating public access');
+    }
+}
+
+// Generate public link
+async function generatePublicLink(brandId) {
+    try {
+        const response = await fetch(`/manager/brand/${brandId}/generate-public-link/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('publicLinkInput').value = data.public_url;
+            document.getElementById('publicLinkSection').style.display = 'block';
+            document.getElementById('publicToggle').checked = true;
+            document.getElementById('toggleLabel').textContent = 'Enabled';
+        } else {
+            alert('Error generating public link');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error generating public link');
+    }
+}
+
+// Regenerate public link
+async function regenerateLink(brandId) {
+    if (!confirm('This will invalidate the old public link. Are you sure?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/manager/brand/${brandId}/regenerate-uuid/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('publicLinkInput').value = data.public_url;
+            alert('Public link has been regenerated successfully!');
+        } else {
+            alert('Error regenerating public link');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error regenerating public link');
+    }
+}
+
+// Copy public link to clipboard
+async function copyPublicLink() {
+    const input = document.getElementById('publicLinkInput');
+    
+    try {
+        await navigator.clipboard.writeText(input.value);
+        
+        // Show success feedback
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove('btn-success');
+        }, 2000);
+        
+    } catch (err) {
+        // Fallback for older browsers
+        input.select();
+        document.execCommand('copy');
+        alert('Public link copied to clipboard!');
+    }
+}
+
+// Open public dashboard in new tab
+function openPublicDashboard() {
+    const url = document.getElementById('publicLinkInput').value;
+    if (url) {
+        window.open(url, '_blank');
+    }
+}
+</script>
 {% endblock %}
