@@ -41,6 +41,12 @@ class ClientPlatformProgress(models.Model):
     # Notes for admin team
     notes = models.TextField(blank=True, help_text="Internal notes for this platform")
     
+    # Platform visibility control
+    is_visible = models.BooleanField(default=True, help_text="Show this platform in dashboards")
+    
+    # Platform activity control
+    is_active = models.BooleanField(default=True, help_text="Mark this platform as active or inactive")
+    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

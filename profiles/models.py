@@ -108,7 +108,9 @@ class BrandProfile(models.Model):
                         committed=0,
                         drafted=0,
                         published=0,
-                        notes=f"Auto-created for {platform_name}"
+                        notes=f"Auto-created for {platform_name}",
+                        is_visible=True,
+                        is_active=True
                     )
                 )
         

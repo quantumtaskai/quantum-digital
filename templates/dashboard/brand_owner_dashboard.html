@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Branding Dashboard - {{ brand_name }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Global Dark Theme Variables */
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #1a1f3a;
+            --bg-tertiary: #2a2f4a;
+            --bg-card: #1e2340;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b6d3;
+            --text-muted: #6b7093;
+            --accent-primary: #00d4ff;
+            --accent-success: #00e676;
+            --accent-warning: #ff9800;
+            --accent-danger: #ff5252;
+            --border-color: #2d3247;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .brand-title {
+            color: var(--accent-primary);
+            font-weight: 800;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .header-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-color);
+            border-color: var(--accent-primary);
+        }
+
+        .metric-label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            display: block;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent-primary);
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .metric-value.active {
+            color: var(--accent-success);
+        }
+
+        /* Main Dashboard Styles */
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .widget {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 25px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        .widget:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px var(--shadow-color);
+            border-color: var(--accent-primary);
+        }
+
+        .widget-title {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .widget-title::before {
+            content: '';
+            width: 4px;
+            height: 1.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
+            border-radius: 2px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            max-width: 400px;
+            margin: 0 auto;
+            height: 300px;
+        }
+
+        /* Platform Grid */
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .platform-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-color);
+            border-color: var(--accent-primary);
+        }
+
+        .platform-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .platform-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: var(--accent-success);
+            color: white;
+        }
+
+        .status-inactive {
+            background: var(--accent-danger);
+            color: white;
+        }
+
+        .platform-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .platform-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .platform-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .platform-link {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--accent-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .platform-link:hover {
+            background: var(--accent-success);
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Metrics Summary */
+        .metrics-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .summary-metric {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .summary-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .summary-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .brand-title {
+                font-size: 2rem;
+            }
+            
+            .header-metrics {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .metric-card {
+                padding: 1rem;
+            }
+            
+            .metric-value {
+                font-size: 1.5rem;
+            }
+            
+            .platform-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .chart-container {
+                max-width: 300px;
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="brand-title">Digital Branding Dashboard - {{ brand_name }}</h1>
+            <div class="header-metrics">
+                <div class="metric-card">
+                    <span class="metric-label">Total Platforms</span>
+                    <span class="metric-value">{{ platform_progress.active_platforms_count|default:13 }}</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Active</span>
+                    <span class="metric-value active">{{ platform_progress.active_platforms_count|default:6 }}</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Content Committed</span>
+                    <span class="metric-value">{{ platform_progress.total_committed|default:1030 }}</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Total Drafted</span>
+                    <span class="metric-value">{{ platform_progress.total_drafted|default:109 }}</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <main class="dashboard">
+        <!-- Platform Performance Section -->
+        <section class="tab-content">
+            <div style="display: grid; grid-template-columns: 70% 28%; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <!-- Platform Status Overview -->
+                <div class="widget">
+                    <h3 class="widget-title">Platform Status Overview</h3>
+                    <div class="chart-container">
+                        <canvas id="platformStatusChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Content Metrics Summary -->
+                <div class="widget">
+                    <h3 class="widget-title">Content Metrics</h3>
+                    <div class="metrics-summary">
+                        <div class="summary-metric">
+                            <span class="summary-value">{{ platform_progress.total_committed|default:1030 }}</span>
+                            <span class="summary-label">Committed</span>
+                        </div>
+                        <div class="summary-metric">
+                            <span class="summary-value">{{ platform_progress.total_drafted|default:109 }}</span>
+                            <span class="summary-label">Drafted</span>
+                        </div>
+                        <div class="summary-metric">
+                            <span class="summary-value">{{ platform_progress.completion_rate|default:11 }}%</span>
+                            <span class="summary-label">Rate</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform Grid -->
+            <div class="widget full-width">
+                <h3 class="widget-title">Platform Details</h3>
+                <div class="platform-grid">
+                    {% for platform in platform_progress.platforms %}
+                    <div class="platform-card">
+                        <div class="platform-header">
+                            <div class="platform-name">{{ platform.get_platform_display }}</div>
+                            <span class="status-badge {% if platform.committed > 0 %}status-active{% else %}status-inactive{% endif %}">
+                                {% if platform.committed > 0 %}ACTIVE{% else %}NOT ACTIVE{% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="platform-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Committed</span>
+                                <span class="stat-value">{{ platform.committed }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Drafted</span>
+                                <span class="stat-value">{{ platform.drafted }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Published</span>
+                                <span class="stat-value">{{ platform.published }}</span>
+                            </div>
+                        </div>
+
+                        <div class="platform-info">
+                            <strong>Category:</strong>
+                            {% if platform.platform == 'website_blogs' or platform.platform == 'medium' %}Professional Writing
+                            {% elif platform.platform == 'instagram' or platform.platform == 'pinterest' %}Visual Content
+                            {% elif platform.platform == 'youtube' or platform.platform == 'tiktok' %}Video Content
+                            {% elif platform.platform == 'twitter' or platform.platform == 'threads' %}Real-Time Social
+                            {% elif platform.platform == 'linkedin' %}Professional Network
+                            {% elif platform.platform == 'facebook' %}Social Community
+                            {% else %}Digital Platform
+                            {% endif %}
+                            <br>
+                            <strong>Primary Content:</strong>
+                            {% if platform.platform == 'website_blogs' %}Long-form Articles, Thought Leadership
+                            {% elif platform.platform == 'instagram' %}Images, Stories, Reels, IGTV
+                            {% elif platform.platform == 'youtube' %}Long-form Videos, Tutorials, Vlogs
+                            {% elif platform.platform == 'linkedin' %}Articles, Company Updates, Industry News
+                            {% elif platform.platform == 'twitter' %}Real-time Updates, News, Discussions
+                            {% elif platform.platform == 'facebook' %}Mixed Content, Community Posts, Events
+                            {% elif platform.platform == 'pinterest' %}Infographics, Product Images, Boards
+                            {% else %}Digital Content
+                            {% endif %}
+                        </div>
+
+                        {% if platform.content_links.all %}
+                        <div class="platform-links">
+                            {% for link in platform.content_links.all %}
+                            <a href="{{ link.url }}" target="_blank" class="platform-link">{{ link.title }}</a>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Initialize Platform Status Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('platformStatusChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active', 'Inactive', 'In Progress'],
+                        datasets: [{
+                            data: [{{ platform_progress.active_platforms_count|default:6 }}, {{ platform_progress.inactive_platforms_count|default:4 }}, {{ platform_progress.in_progress_count|default:3 }}],
+                            backgroundColor: [
+                                '#00e676',  // Active - success green
+                                '#ff5252',  // Inactive - danger red
+                                '#ff9800'   // In progress - warning orange
+                            ],
+                            borderColor: '#1e2340',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#b0b6d3',
+                                    padding: 20,
+                                    usePointStyle: true
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#1e2340',
+                                titleColor: '#ffffff',
+                                bodyColor: '#b0b6d3',
+                                borderColor: '#00d4ff',
+                                borderWidth: 1
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

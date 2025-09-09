@@ -205,14 +205,8 @@ def get_platform_progress(user):
     try:
         from profiles.models import BrandProfile
         brand = BrandProfile.objects.get(user=user)
-        all_platforms = ClientPlatformProgress.objects.filter(brand=brand).order_by('platform')
-        
-        # Ensure all platforms exist (auto-create if missing for existing brands)
-        if all_platforms.count() < len(ClientPlatformProgress.PLATFORM_CHOICES):
-            created_count = brand.create_default_platform_records()
-            if created_count > 0:
-                # Re-fetch after creating missing records
-                all_platforms = ClientPlatformProgress.objects.filter(brand=brand).order_by('platform')
+        # Get only visible platforms for display
+        all_platforms = ClientPlatformProgress.objects.filter(brand=brand, is_visible=True).order_by('platform')
                 
     except BrandProfile.DoesNotExist:
         all_platforms = ClientPlatformProgress.objects.none()
@@ -227,10 +221,10 @@ def get_platform_progress(user):
     total_published = sum(p.published for p in all_platforms)
     completion_rate = (total_published / total_committed * 100) if total_committed > 0 else 0
     
-    # Calculate chart-specific metrics for pie chart
-    active_platforms_count = sum(1 for p in all_platforms if p.committed > 0)
-    inactive_platforms_count = sum(1 for p in all_platforms if p.committed == 0)
-    in_progress_count = sum(1 for p in all_platforms if p.drafted > 0 and p.published < p.committed)
+    # Calculate chart-specific metrics for pie chart using is_active field
+    active_platforms_count = sum(1 for p in all_platforms if p.is_active)
+    inactive_platforms_count = sum(1 for p in all_platforms if not p.is_active)
+    in_progress_count = sum(1 for p in all_platforms if p.is_active and p.drafted > 0 and p.published < p.committed)
     
     return {
         'platforms': all_platforms,

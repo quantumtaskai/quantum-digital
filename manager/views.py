@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q, Count, Sum
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from profiles.models import BrandProfile
 from dashboard.models import ClientPlatformProgress
 from django.utils import timezone
@@ -247,3 +248,77 @@ def regenerate_public_uuid(request, brand_id):
         })
     
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+@user_passes_test(is_staff_user)
+@require_POST
+def toggle_platform_visibility(request, platform_id):
+    """Toggle visibility of a specific platform"""
+    try:
+        from dashboard.models import ClientPlatformProgress
+        platform = get_object_or_404(ClientPlatformProgress, id=platform_id)
+        
+        # Toggle visibility
+        platform.is_visible = not platform.is_visible
+        platform.save()
+        
+        return JsonResponse({
+            'success': True,
+            'is_visible': platform.is_visible,
+            'platform_name': platform.get_platform_display()
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@user_passes_test(is_staff_user)
+@require_POST 
+def bulk_platform_visibility(request, brand_id):
+    """Bulk update platform visibility"""
+    try:
+        from dashboard.models import ClientPlatformProgress
+        from profiles.models import BrandProfile
+        
+        brand = get_object_or_404(BrandProfile, id=brand_id)
+        
+        action = request.POST.get('action')
+        
+        if action == 'show_all':
+            ClientPlatformProgress.objects.filter(brand=brand).update(is_visible=True)
+            message = "All platforms are now visible"
+        elif action == 'hide_inactive':
+            ClientPlatformProgress.objects.filter(brand=brand, committed=0).update(is_visible=False)
+            message = "Inactive platforms are now hidden"
+        else:
+            return JsonResponse({'error': 'Invalid action'}, status=400)
+        
+        return JsonResponse({
+            'success': True,
+            'message': message
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@user_passes_test(is_staff_user)
+@require_POST
+def toggle_platform_active(request, platform_id):
+    """Toggle active status of a specific platform"""
+    try:
+        from dashboard.models import ClientPlatformProgress
+        platform = get_object_or_404(ClientPlatformProgress, id=platform_id)
+        
+        # Toggle active status
+        platform.is_active = not platform.is_active
+        platform.save()
+        
+        return JsonResponse({
+            'success': True,
+            'is_active': platform.is_active,
+            'platform_name': platform.get_platform_display()
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

@@ -12,4 +12,9 @@ urlpatterns = [
     path('brand/<int:brand_id>/generate-public-link/', views.generate_public_link, name='generate_public_link'),
     path('brand/<int:brand_id>/toggle-public-access/', views.toggle_public_access, name='toggle_public_access'),
     path('brand/<int:brand_id>/regenerate-uuid/', views.regenerate_public_uuid, name='regenerate_public_uuid'),
+    # Platform visibility management
+    path('platform/<int:platform_id>/toggle-visibility/', views.toggle_platform_visibility, name='toggle_platform_visibility'),
+    path('brand/<int:brand_id>/bulk-platform-visibility/', views.bulk_platform_visibility, name='bulk_platform_visibility'),
+    # Platform active status management
+    path('platform/<int:platform_id>/toggle-active/', views.toggle_platform_active, name='toggle_platform_active'),
 ]

@@ -1,0 +1,273 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 100,
+    "fields": {
+      "username": "reddotevents",
+      "email": "contact@reddotevents.com",
+      "first_name": "Red Dot",
+      "last_name": "Events",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "date_joined": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "profiles.brandprofile",
+    "pk": 100,
+    "fields": {
+      "user": 100,
+      "brand_name": "Red Dot Events",
+      "primary_contact_first_name": "Sarah",
+      "primary_contact_last_name": "Johnson", 
+      "primary_official_email": "sarah@reddotevents.com",
+      "primary_phone_number": "+1-555-0123",
+      "brand_website": "https://reddotevents.com",
+      "brand_vision": "Creating unforgettable experiences through innovative event planning and digital marketing",
+      "brand_mission": "To deliver exceptional event experiences that exceed expectations through strategic digital presence",
+      "brand_core_values": "Creativity, Excellence, Innovation, Customer Focus, Digital Excellence",
+      "is_public_enabled": true,
+      "public_uuid": "12345678-1234-5678-9abc-123456789abc",
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1001,
+    "fields": {
+      "brand": 100,
+      "platform": "website_blogs",
+      "committed": 50,
+      "drafted": 10,
+      "published": 0,
+      "notes": "Professional blog content for event marketing"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress", 
+    "pk": 1002,
+    "fields": {
+      "brand": 100,
+      "platform": "website_downloadable",
+      "committed": 10,
+      "drafted": 1,
+      "published": 0,
+      "notes": "Event guides and downloadable resources"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1003, 
+    "fields": {
+      "brand": 100,
+      "platform": "google_business",
+      "committed": 100,
+      "drafted": 11,
+      "published": 0,
+      "notes": "Google Business profile optimization"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1004,
+    "fields": {
+      "brand": 100,
+      "platform": "linkedin", 
+      "committed": 45,
+      "drafted": 10,
+      "published": 0,
+      "notes": "Professional networking and B2B content"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1005,
+    "fields": {
+      "brand": 100,
+      "platform": "youtube",
+      "committed": 5,
+      "drafted": 1,
+      "published": 0,
+      "notes": "Event highlight videos and tutorials"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1006,
+    "fields": {
+      "brand": 100,
+      "platform": "tiktok",
+      "committed": 10,
+      "drafted": 1,
+      "published": 0,
+      "notes": "Short-form event highlights and behind-the-scenes"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1007,
+    "fields": {
+      "brand": 100,
+      "platform": "instagram",
+      "committed": 160,
+      "drafted": 45,
+      "published": 0,
+      "notes": "Visual event content, stories, and reels"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1008,
+    "fields": {
+      "brand": 100,
+      "platform": "pinterest",
+      "committed": 180,
+      "drafted": 0,
+      "published": 1,
+      "notes": "Event inspiration boards and planning content"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1009,
+    "fields": {
+      "brand": 100,
+      "platform": "twitter",
+      "committed": 180,
+      "drafted": 10,
+      "published": 1,
+      "notes": "Real-time event updates and engagement"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1010,
+    "fields": {
+      "brand": 100,
+      "platform": "facebook",
+      "committed": 180,
+      "drafted": 10,
+      "published": 0,
+      "notes": "Community building and event promotion"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1011,
+    "fields": {
+      "brand": 100,
+      "platform": "medium",
+      "committed": 30,
+      "drafted": 0,
+      "published": 2,
+      "notes": "Long-form thought leadership articles"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1012,
+    "fields": {
+      "brand": 100,
+      "platform": "threads",
+      "committed": 30,
+      "drafted": 0,
+      "published": 0,
+      "notes": "Text-based social engagement"
+    }
+  },
+  {
+    "model": "dashboard.clientplatformprogress",
+    "pk": 1013,
+    "fields": {
+      "brand": 100,
+      "platform": "tumblr",
+      "committed": 30,
+      "drafted": 10,
+      "published": 1,
+      "notes": "Creative visual content and storytelling"
+    }
+  },
+  {
+    "model": "dashboard.contentlink",
+    "pk": 2001,
+    "fields": {
+      "platform_progress": 1001,
+      "title": "View Content Plan",
+      "url": "https://docs.google.com/spreadsheets/d/abc123/website-blogs-content-plan"
+    }
+  },
+  {
+    "model": "dashboard.contentlink",
+    "pk": 2002,
+    "fields": {
+      "platform_progress": 1003,
+      "title": "Visit Platform",
+      "url": "https://business.google.com/reddotevents"
+    }
+  },
+  {
+    "model": "dashboard.contentlink",
+    "pk": 2003,
+    "fields": {
+      "platform_progress": 1004,
+      "title": "View Content Plan",
+      "url": "https://docs.google.com/spreadsheets/d/abc123/linkedin-content-plan"
+    }
+  },
+  {
+    "model": "dashboard.contentlink",
+    "pk": 2004,
+    "fields": {
+      "platform_progress": 1007,
+      "title": "View Content Plan",
+      "url": "https://docs.google.com/spreadsheets/d/abc123/instagram-content-plan"
+    }
+  },
+  {
+    "model": "dashboard.contentlink",
+    "pk": 2005,
+    "fields": {
+      "platform_progress": 1008,
+      "title": "Visit Platform",
+      "url": "https://pinterest.com/reddotevents"
+    }
+  },
+  {
+    "model": "dashboard.contentlink",
+    "pk": 2006,
+    "fields": {
+      "platform_progress": 1009,
+      "title": "Visit Platform",
+      "url": "https://twitter.com/reddotevents"
+    }
+  },
+  {
+    "model": "dashboard.contentlink",
+    "pk": 2007,
+    "fields": {
+      "platform_progress": 1010,
+      "title": "Visit Platform", 
+      "url": "https://facebook.com/reddotevents"
+    }
+  },
+  {
+    "model": "dashboard.contentlink",
+    "pk": 2008,
+    "fields": {
+      "platform_progress": 1011,
+      "title": "View Content Plan",
+      "url": "https://docs.google.com/spreadsheets/d/abc123/medium-content-plan"
+    }
+  },
+  {
+    "model": "dashboard.contentlink",
+    "pk": 2009,
+    "fields": {
+      "platform_progress": 1013,
+      "title": "Visit Platform",
+      "url": "https://reddotevents.tumblr.com"
+    }
+  }
+]

@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         /* Global Dark Theme Variables */
@@ -726,18 +727,19 @@
                             </div>
                         </div>
                         <div class="platform-metrics">
-                            <div class="platform-metric">
-                                <span class="platform-name">Instagram</span>
-                                <span class="platform-stats">160C : 10D</span>
-                            </div>
-                            <div class="platform-metric">
-                                <span class="platform-name">Pinterest</span>
-                                <span class="platform-stats">130C : 0D</span>
-                            </div>
-                            <div class="platform-metric">
-                                <span class="platform-name">X (Twitter)</span>
-                                <span class="platform-stats">180C : 10D</span>
-                            </div>
+                            {% if platform_progress.platforms %}
+                                {% for progress in platform_progress.platforms|slice:":5" %}
+                                <div class="platform-metric">
+                                    <span class="platform-name">{{ progress.get_platform_display }}</span>
+                                    <span class="platform-stats">{{ progress.committed }}C : {{ progress.drafted }}D</span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="platform-metric">
+                                    <span class="platform-name">No platforms configured</span>
+                                    <span class="platform-stats">--</span>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -757,8 +759,8 @@
                         <div class="platform-detail-card">
                             <div class="platform-title">
                                 {{ progress.get_platform_display }}
-                                <span class="status-badge {% if progress.committed > 0 %}active{% else %}not-active{% endif %}">
-                                    {% if progress.committed > 0 %}ACTIVE{% else %}NOT ACTIVE{% endif %}
+                                <span class="status-badge {% if progress.is_active %}active{% else %}not-active{% endif %}">
+                                    {% if progress.is_active %}ACTIVE{% else %}NOT ACTIVE{% endif %}
                                 </span>
                             </div>
                             
@@ -853,7 +855,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Initialize Platform Status Chart
         document.addEventListener('DOMContentLoaded', function() {
@@ -868,7 +869,7 @@
                             backgroundColor: [
                                 '#00e676',  // Active - success green
                                 '#ff5252',  // Inactive - danger red
-                                '#ff9800'   // Already in place - warning orange
+                                '#ff9800'   // In Progress - warning orange
                             ],
                             borderColor: '#1e2340',
                             borderWidth: 2

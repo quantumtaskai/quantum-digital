@@ -106,17 +106,19 @@ class Command(BaseCommand):
                             'drafted': drafted, 
                             'published': published,
                             'notes': notes,
-                            'is_visible': is_visible
+                            'is_visible': is_visible,
+                            'is_active': True  # Default for new platforms
                         }
                     )
                     
                     if not created:
-                        # Update existing record
+                        # Update existing record - preserve is_active value
                         progress.committed = committed
                         progress.drafted = drafted
                         progress.published = published
                         progress.notes = notes
                         progress.is_visible = is_visible
+                        # Note: is_active is NOT updated to preserve manual changes
                         progress.save()
                     
                     updated_count += 1

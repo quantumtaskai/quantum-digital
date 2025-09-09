@@ -165,6 +165,14 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4>Platform Progress</h4>
                 <div class="d-flex gap-2">
+                    <button onclick="bulkPlatformVisibility('show_all')" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-eye me-1"></i>
+                        Show All
+                    </button>
+                    <button onclick="bulkPlatformVisibility('hide_inactive')" class="btn btn-sm btn-outline-warning">
+                        <i class="fas fa-eye-slash me-1"></i>
+                        Hide Inactive
+                    </button>
                     <a href="/admin/dashboard/clientplatformprogress/add/?user={{ brand.user.id }}" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-plus me-1"></i>
                         Add Platform
@@ -179,9 +187,36 @@
                         <div class="p-3 border rounded">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="mb-0">{{ platform.get_platform_display }}</h6>
-                                <a href="/admin/dashboard/clientplatformprogress/{{ platform.id }}/change/" class="btn btn-sm btn-outline-secondary">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <!-- Visibility Toggle -->
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="visibility_{{ platform.id }}" 
+                                               {% if platform.is_visible %}checked{% endif %}
+                                               onchange="togglePlatformVisibility({{ platform.id }})">
+                                        <label class="form-check-label" for="visibility_{{ platform.id }}" title="Toggle Visibility">
+                                            <i class="fas fa-eye{% if not platform.is_visible %}-slash{% endif %}" id="eye_{{ platform.id }}"></i>
+                                        </label>
+                                    </div>
+                                    
+                                    <!-- Active/Inactive Toggle -->
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="active_{{ platform.id }}" 
+                                               {% if platform.is_active %}checked{% endif %}
+                                               onchange="togglePlatformActive({{ platform.id }})">
+                                        <label class="form-check-label" for="active_{{ platform.id }}" title="Toggle Active Status">
+                                            <i class="fas fa-{% if platform.is_active %}play{% else %}pause{% endif %}" id="active_icon_{{ platform.id }}" style="color: {% if platform.is_active %}#28a745{% else %}#dc3545{% endif %}"></i>
+                                        </label>
+                                    </div>
+                                    
+                                    <!-- Status Badge -->
+                                    <span class="badge {% if platform.is_active %}bg-success{% else %}bg-danger{% endif %}" id="status_badge_{{ platform.id }}">
+                                        {% if platform.is_active %}ACTIVE{% else %}INACTIVE{% endif %}
+                                    </span>
+                                    
+                                    <a href="/admin/dashboard/clientplatformprogress/{{ platform.id }}/change/" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
                             </div>
                             
                             <div class="progress-stats mb-2">
@@ -415,6 +450,102 @@ function openPublicDashboard() {
     if (url) {
         window.open(url, '_blank');
     }
+}
+
+// Platform visibility toggle functions
+function togglePlatformVisibility(platformId) {
+    fetch(`/manager/platform/${platformId}/toggle-visibility/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the eye icon
+            const eyeIcon = document.getElementById(`eye_${platformId}`);
+            if (data.is_visible) {
+                eyeIcon.className = 'fas fa-eye';
+            } else {
+                eyeIcon.className = 'fas fa-eye-slash';
+            }
+            
+            // Show success message
+            showMessage(`${data.platform_name} visibility updated`, 'success');
+        } else {
+            showMessage('Error updating visibility: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error updating visibility', 'error');
+    });
+}
+
+function bulkPlatformVisibility(action) {
+    fetch(`/manager/brand/{{ brand.id }}/bulk-platform-visibility/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=${action}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload the page to reflect changes
+            window.location.reload();
+        } else {
+            showMessage('Error: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error updating platform visibility', 'error');
+    });
+}
+
+// Platform active toggle function
+function togglePlatformActive(platformId) {
+    fetch(`/manager/platform/${platformId}/toggle-active/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the active icon
+            const activeIcon = document.getElementById(`active_icon_${platformId}`);
+            const statusBadge = document.getElementById(`status_badge_${platformId}`);
+            
+            if (data.is_active) {
+                activeIcon.className = 'fas fa-play';
+                activeIcon.style.color = '#28a745';
+                statusBadge.className = 'badge bg-success';
+                statusBadge.textContent = 'ACTIVE';
+            } else {
+                activeIcon.className = 'fas fa-pause';
+                activeIcon.style.color = '#dc3545';
+                statusBadge.className = 'badge bg-danger';
+                statusBadge.textContent = 'INACTIVE';
+            }
+            
+            // Show success message
+            showMessage(`${data.platform_name} status updated to ${data.is_active ? 'ACTIVE' : 'INACTIVE'}`, 'success');
+        } else {
+            showMessage('Error updating active status: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error updating active status', 'error');
+    });
 }
 </script>
 {% endblock %}
