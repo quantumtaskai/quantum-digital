@@ -28,6 +28,7 @@ class ClientPlatformProgress(models.Model):
         ('vimeo', 'Vimeo'),
         ('dailymotion', 'Daily Motion'),
         ('rumble', 'Rumble'),
+        ('linktree', 'Linktree'),
     ]
     
     brand = models.ForeignKey('profiles.BrandProfile', on_delete=models.CASCADE, related_name='platform_progress')

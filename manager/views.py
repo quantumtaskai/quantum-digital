@@ -57,11 +57,19 @@ def manager_dashboard(request):
         else:
             brand.completion_rate = 0
     
+    # Calculate summary statistics 
+    total_platforms = sum(brand.platform_count for brand in brands)
+    total_committed_all = sum(brand.total_committed for brand in brands)
+    total_published_all = sum(brand.total_published for brand in brands)
+    
     context = {
         'brands': brands,
         'search_query': search_query,
         'sort_by': sort_by,
         'total_brands': brands.count(),
+        'total_platforms': total_platforms,
+        'total_committed_all': total_committed_all, 
+        'total_published_all': total_published_all,
     }
     
     return render(request, 'manager/dashboard.html', context)

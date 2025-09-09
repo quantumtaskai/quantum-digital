@@ -1,6 +1,12 @@
 {% extends 'manager/base.html' %}
 
-{% block page_title %}Brand Management{% endblock %}
+{% block page_title %}
+<div class="d-flex align-items-center">
+    {% load static %}
+    <img src="{% static 'images/logo.png' %}" alt="Quantum Digital" class="header-logo me-3">
+    Brand Management
+</div>
+{% endblock %}
 
 {% block header_actions %}
 <!-- Search Bar -->
@@ -60,7 +66,7 @@
         <div class="brand-card">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h3 class="mb-0">{% for brand in brands %}{{ brand.platform_count|add:0 }}{% endfor %}</h3>
+                    <h3 class="mb-0">{{ total_platforms }}</h3>
                     <p class="text-muted mb-0">Active Platforms</p>
                 </div>
                 <div class="text-success">
@@ -73,7 +79,7 @@
         <div class="brand-card">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h3 class="mb-0">{% for brand in brands %}{{ brand.total_committed|add:0 }}{% endfor %}</h3>
+                    <h3 class="mb-0">{{ total_committed_all }}</h3>
                     <p class="text-muted mb-0">Content Committed</p>
                 </div>
                 <div class="text-warning">
@@ -86,7 +92,7 @@
         <div class="brand-card">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h3 class="mb-0">{% for brand in brands %}{{ brand.total_published|add:0 }}{% endfor %}</h3>
+                    <h3 class="mb-0">{{ total_published_all }}</h3>
                     <p class="text-muted mb-0">Content Published</p>
                 </div>
                 <div class="text-success">
