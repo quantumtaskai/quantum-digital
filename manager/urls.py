@@ -17,4 +17,12 @@ urlpatterns = [
     path('brand/<int:brand_id>/bulk-platform-visibility/', views.bulk_platform_visibility, name='bulk_platform_visibility'),
     # Platform active status management
     path('platform/<int:platform_id>/toggle-active/', views.toggle_platform_active, name='toggle_platform_active'),
+    # Platform update page
+    path('platform-update/', views.platform_update, name='platform_update'),
+    path('brand/<int:brand_id>/platforms/', views.get_brand_platforms, name='get_brand_platforms'),
+    path('platform/update-progress/', views.update_platform_progress, name='update_platform_progress'),
+    path('platform/add-content-link/', views.add_content_link, name='add_content_link'),
+    path('content-link/<int:link_id>/delete/', views.delete_content_link, name='delete_content_link'),
+    # Brand quick update page
+    path('brand/<int:brand_id>/quick-update/', views.brand_quick_update, name='brand_quick_update'),
 ]

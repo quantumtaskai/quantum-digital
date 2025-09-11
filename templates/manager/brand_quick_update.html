@@ -1,0 +1,418 @@
+{% extends 'manager/base.html' %}
+
+{% block page_title %}{{ brand.brand_name }} - Quick Update{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    <a href="{% url 'manager:brand_detail' brand.id %}" class="btn btn-outline-secondary">
+        <i class="fas fa-eye me-2"></i>
+        View Details
+    </a>
+    <a href="{% url 'manager:dashboard' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>
+        Back to Dashboard
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="brand-card">
+            <h4 class="mb-4">
+                <i class="fas fa-chart-line me-2"></i>
+                {{ brand.brand_name }} - Platform Progress Update
+            </h4>
+            
+            {% if platforms %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 15%;">Platform</th>
+                                <th style="width: 25%;">Platform Link</th>
+                                <th style="width: 10%;">Committed</th>
+                                <th style="width: 10%;">Drafted</th>
+                                <th style="width: 10%;">Published</th>
+                                <th style="width: 30%;">Content Links</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for platform in platforms %}
+                            <tr data-platform-id="{{ platform.id }}">
+                                <!-- Platform Name -->
+                                <td>
+                                    <strong>{{ platform.get_platform_display }}</strong>
+                                    <br>
+                                    <div class="mt-1">
+                                        <span class="badge {% if platform.is_active %}bg-success{% else %}bg-danger{% endif %} me-1">
+                                            {% if platform.is_active %}ACTIVE{% else %}INACTIVE{% endif %}
+                                        </span>
+                                        <span class="badge {% if platform.is_visible %}bg-primary{% else %}bg-secondary{% endif %}">
+                                            {% if platform.is_visible %}VISIBLE{% else %}HIDDEN{% endif %}
+                                        </span>
+                                    </div>
+                                </td>
+                                
+                                <!-- Platform Link -->
+                                <td>
+                                    <div class="input-group input-group-sm">
+                                        <input type="url" 
+                                               class="form-control platform-link-input" 
+                                               value="{{ platform.platform_link }}"
+                                               placeholder="https://"
+                                               data-platform-id="{{ platform.id }}"
+                                               onchange="updatePlatformField({{ platform.id }}, 'platform_link', this.value)">
+                                        {% if platform.platform_link %}
+                                        <a href="{{ platform.platform_link }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                
+                                <!-- Committed -->
+                                <td>
+                                    <input type="number" 
+                                           class="form-control form-control-sm text-center" 
+                                           value="{{ platform.committed }}"
+                                           min="0"
+                                           data-platform-id="{{ platform.id }}"
+                                           onchange="updatePlatformField({{ platform.id }}, 'committed', this.value)">
+                                </td>
+                                
+                                <!-- Drafted -->
+                                <td>
+                                    <input type="number" 
+                                           class="form-control form-control-sm text-center" 
+                                           value="{{ platform.drafted }}"
+                                           min="0"
+                                           data-platform-id="{{ platform.id }}"
+                                           onchange="updatePlatformField({{ platform.id }}, 'drafted', this.value)">
+                                </td>
+                                
+                                <!-- Published -->
+                                <td>
+                                    <input type="number" 
+                                           class="form-control form-control-sm text-center" 
+                                           value="{{ platform.published }}"
+                                           min="0"
+                                           data-platform-id="{{ platform.id }}"
+                                           onchange="updatePlatformField({{ platform.id }}, 'published', this.value)">
+                                    <!-- Progress Bar -->
+                                    <div class="progress mt-1" style="height: 4px;">
+                                        <div class="progress-bar bg-success" 
+                                             style="width: {{ platform.completion_percentage }}%;"></div>
+                                    </div>
+                                    <small class="text-muted">{{ platform.completion_percentage }}%</small>
+                                </td>
+                                
+                                <!-- Content Links -->
+                                <td>
+                                    <div class="content-links-container" id="content-links-{{ platform.id }}">
+                                        {% if platform.other_content_links %}
+                                            {% for link in platform.other_content_links %}
+                                            <div class="mb-1">
+                                                <a href="{{ link.url }}" target="_blank" class="text-decoration-none small">
+                                                    <i class="fas fa-link me-1"></i>{{ link.title }}
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-danger ms-1" 
+                                                        onclick="deleteContentLink({{ link.id }}, {{ platform.id }})">
+                                                    <i class="fas fa-trash-sm"></i>
+                                                </button>
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <small class="text-muted">No content links</small>
+                                        {% endif %}
+                                        
+                                        <!-- Add Link Button -->
+                                        <button class="btn btn-sm btn-outline-primary mt-1" 
+                                                onclick="showAddLinkForm({{ platform.id }})">
+                                            <i class="fas fa-plus me-1"></i>Add Link
+                                        </button>
+                                        
+                                        <!-- Add Link Form (hidden) -->
+                                        <div id="add-link-form-{{ platform.id }}" style="display: none;" class="mt-2 p-2 border rounded bg-light">
+                                            <input type="text" class="form-control form-control-sm mb-1" 
+                                                   id="link-title-{{ platform.id }}" placeholder="Link title">
+                                            <input type="url" class="form-control form-control-sm mb-1" 
+                                                   id="link-url-{{ platform.id }}" placeholder="https://">
+                                            <div class="d-flex gap-1">
+                                                <button class="btn btn-sm btn-primary" 
+                                                        onclick="addContentLink({{ platform.id }})">Save</button>
+                                                <button class="btn btn-sm btn-secondary" 
+                                                        onclick="hideAddLinkForm({{ platform.id }})">Cancel</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-3 d-flex gap-2">
+                    <button class="btn btn-success" onclick="saveAllChanges()">
+                        <i class="fas fa-save me-2"></i>
+                        Save All Changes
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="location.reload()">
+                        <i class="fas fa-undo me-2"></i>
+                        Reset All
+                    </button>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-share-alt fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No platforms configured</h5>
+                    <p class="text-muted">This brand has no platforms set up yet</p>
+                    <a href="/admin/dashboard/clientplatformprogress/add/?user={{ brand.user.id }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>
+                        Add First Platform
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    <div id="alertContainer"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// CSRF Token for AJAX requests
+function getCSRFToken() {
+    const token = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (token) {
+        return token.value;
+    }
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') {
+            return value;
+        }
+    }
+    return '';
+}
+
+// Track changes for bulk save
+let pendingChanges = {};
+
+// Update platform field and track changes
+function updatePlatformField(platformId, field, value) {
+    if (!pendingChanges[platformId]) {
+        pendingChanges[platformId] = {};
+    }
+    pendingChanges[platformId][field] = value;
+    
+    // Update progress bar if it's a number field
+    if (['committed', 'drafted', 'published'].includes(field)) {
+        updateProgressBar(platformId);
+    }
+    
+    // Update platform link button
+    if (field === 'platform_link') {
+        updatePlatformLinkButton(platformId, value);
+    }
+}
+
+// Update progress bar for a specific platform
+function updateProgressBar(platformId) {
+    const committedInput = document.querySelector(`input[data-platform-id="${platformId}"][onchange*="committed"]`);
+    const publishedInput = document.querySelector(`input[data-platform-id="${platformId}"][onchange*="published"]`);
+    
+    const committed = parseInt(committedInput.value) || 0;
+    const published = parseInt(publishedInput.value) || 0;
+    
+    const percentage = committed > 0 ? Math.round((published / committed) * 100) : 0;
+    
+    const progressBar = document.querySelector(`tr[data-platform-id="${platformId}"] .progress-bar`);
+    const percentageText = document.querySelector(`tr[data-platform-id="${platformId}"] small`);
+    
+    if (progressBar) {
+        progressBar.style.width = percentage + '%';
+    }
+    if (percentageText) {
+        percentageText.textContent = percentage + '%';
+    }
+}
+
+// Update platform link button
+function updatePlatformLinkButton(platformId, url) {
+    const row = document.querySelector(`tr[data-platform-id="${platformId}"]`);
+    const inputGroup = row.querySelector('.input-group');
+    
+    // Remove existing button
+    const existingButton = inputGroup.querySelector('a');
+    if (existingButton) {
+        existingButton.remove();
+    }
+    
+    // Add new button if URL exists
+    if (url && url.trim()) {
+        const button = document.createElement('a');
+        button.href = url;
+        button.target = '_blank';
+        button.className = 'btn btn-outline-primary btn-sm';
+        button.innerHTML = '<i class="fas fa-external-link-alt"></i>';
+        inputGroup.appendChild(button);
+    }
+}
+
+// Save all pending changes
+async function saveAllChanges() {
+    if (Object.keys(pendingChanges).length === 0) {
+        showAlert('No changes to save', 'info');
+        return;
+    }
+    
+    let allSuccess = true;
+    
+    for (const [platformId, changes] of Object.entries(pendingChanges)) {
+        try {
+            const formData = new FormData();
+            formData.append('platform_id', platformId);
+            
+            // Get current values from inputs
+            const row = document.querySelector(`tr[data-platform-id="${platformId}"]`);
+            formData.append('committed', row.querySelector('input[onchange*="committed"]').value || '0');
+            formData.append('drafted', row.querySelector('input[onchange*="drafted"]').value || '0');
+            formData.append('published', row.querySelector('input[onchange*="published"]').value || '0');
+            formData.append('platform_link', row.querySelector('.platform-link-input').value || '');
+            formData.append('notes', ''); // Notes field not shown in table
+            
+            const response = await fetch('/manager/platform/update-progress/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                allSuccess = false;
+                showAlert(`Error updating ${platformId}: ${data.error}`, 'danger');
+            }
+        } catch (error) {
+            allSuccess = false;
+            showAlert(`Error updating platform ${platformId}`, 'danger');
+        }
+    }
+    
+    if (allSuccess) {
+        showAlert('All changes saved successfully!', 'success');
+        pendingChanges = {}; // Clear pending changes
+    }
+}
+
+// Content Links functionality
+function showAddLinkForm(platformId) {
+    document.getElementById(`add-link-form-${platformId}`).style.display = 'block';
+}
+
+function hideAddLinkForm(platformId) {
+    document.getElementById(`add-link-form-${platformId}`).style.display = 'none';
+    document.getElementById(`link-title-${platformId}`).value = '';
+    document.getElementById(`link-url-${platformId}`).value = '';
+}
+
+async function addContentLink(platformId) {
+    const title = document.getElementById(`link-title-${platformId}`).value.trim();
+    const url = document.getElementById(`link-url-${platformId}`).value.trim();
+    
+    if (!title || !url) {
+        showAlert('Please enter both title and URL', 'warning');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('platform_id', platformId);
+    formData.append('title', title);
+    formData.append('url', url);
+    
+    try {
+        const response = await fetch('/manager/platform/add-content-link/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showAlert('Content link added successfully', 'success');
+            hideAddLinkForm(platformId);
+            // Reload the page to show new link
+            location.reload();
+        } else {
+            showAlert(data.error, 'danger');
+        }
+    } catch (error) {
+        showAlert('Error adding content link', 'danger');
+    }
+}
+
+async function deleteContentLink(linkId, platformId) {
+    if (!confirm('Are you sure you want to delete this content link?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/manager/content-link/${linkId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showAlert('Content link deleted successfully', 'success');
+            // Reload the page to remove deleted link
+            location.reload();
+        } else {
+            showAlert(data.error, 'danger');
+        }
+    } catch (error) {
+        showAlert('Error deleting content link', 'danger');
+    }
+}
+
+// Show alert message
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertId = 'alert-' + Date.now();
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.id = alertId;
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    alertContainer.appendChild(alertDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        const alert = document.getElementById(alertId);
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

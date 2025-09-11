@@ -39,11 +39,17 @@
     </ul>
 </div>
 
-<!-- Create Brand Button -->
-<a href="/admin/profiles/brandprofile/add/" class="btn-primary-custom">
-    <i class="fas fa-plus me-2"></i>
-    Create Brand
-</a>
+<!-- Quick Actions -->
+<div class="d-flex gap-2">
+    <a href="{% url 'manager:platform_update' %}" class="btn btn-success">
+        <i class="fas fa-chart-line me-2"></i>
+        Quick Update
+    </a>
+    <a href="/admin/profiles/brandprofile/add/" class="btn-primary-custom">
+        <i class="fas fa-plus me-2"></i>
+        Create Brand
+    </a>
+</div>
 {% endblock %}
 
 {% block content %}

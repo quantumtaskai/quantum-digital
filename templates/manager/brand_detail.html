@@ -4,6 +4,10 @@
 
 {% block header_actions %}
 <div class="d-flex gap-2">
+    <a href="{% url 'manager:brand_quick_update' brand.id %}" class="btn btn-success">
+        <i class="fas fa-chart-line me-2"></i>
+        Quick Update
+    </a>
     <a href="/admin/profiles/brandprofile/{{ brand.id }}/change/" class="btn btn-outline-secondary">
         <i class="fas fa-edit me-2"></i>
         Edit Profile

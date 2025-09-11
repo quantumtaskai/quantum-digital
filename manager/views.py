@@ -4,13 +4,14 @@ from django.db.models import Q, Count, Sum
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from profiles.models import BrandProfile
-from dashboard.models import ClientPlatformProgress
+from dashboard.models import ClientPlatformProgress, ContentLink
 from django.utils import timezone
 from django.urls import reverse
 import zipfile
 import io
 import os
 from django.http import HttpResponse
+from django.contrib import messages
 
 
 def is_staff_user(user):
@@ -330,3 +331,190 @@ def toggle_platform_active(request, platform_id):
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@user_passes_test(is_staff_user)
+def platform_update(request):
+    """Simple platform progress update page"""
+    brands = BrandProfile.objects.select_related('user').all().order_by('brand_name')
+    
+    context = {
+        'brands': brands,
+    }
+    
+    return render(request, 'manager/platform_update.html', context)
+
+
+@user_passes_test(is_staff_user)
+def get_brand_platforms(request, brand_id):
+    """AJAX endpoint to get platforms for a specific brand"""
+    try:
+        brand = get_object_or_404(BrandProfile, id=brand_id)
+        platforms = ClientPlatformProgress.objects.filter(brand=brand).order_by('platform')
+        
+        platforms_data = []
+        for platform in platforms:
+            platforms_data.append({
+                'id': platform.id,
+                'platform': platform.platform,
+                'platform_display': platform.get_platform_display(),
+                'committed': platform.committed,
+                'drafted': platform.drafted,
+                'published': platform.published,
+                'notes': platform.notes,
+                'is_visible': platform.is_visible,
+                'is_active': platform.is_active,
+                'content_links': [
+                    {'id': link.id, 'title': link.title, 'url': link.url}
+                    for link in platform.content_links.all()
+                ]
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'platforms': platforms_data,
+            'brand_name': brand.brand_name
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@user_passes_test(is_staff_user)
+@require_POST
+def update_platform_progress(request):
+    """AJAX endpoint to update platform progress"""
+    try:
+        platform_id = request.POST.get('platform_id')
+        committed = int(request.POST.get('committed', 0))
+        drafted = int(request.POST.get('drafted', 0))
+        published = int(request.POST.get('published', 0))
+        notes = request.POST.get('notes', '')
+        platform_link = request.POST.get('platform_link', '').strip()
+        
+        # Validation
+        if drafted > committed:
+            return JsonResponse({'error': 'Drafted cannot be more than committed'}, status=400)
+        if published > drafted:
+            return JsonResponse({'error': 'Published cannot be more than drafted'}, status=400)
+        
+        platform = get_object_or_404(ClientPlatformProgress, id=platform_id)
+        platform.committed = committed
+        platform.drafted = drafted
+        platform.published = published
+        platform.notes = notes
+        platform.save()
+        
+        # Handle platform link - create/update/delete Platform Profile content link
+        platform_profile_link = ContentLink.objects.filter(
+            platform_progress=platform, 
+            title='Platform Profile'
+        ).first()
+        
+        if platform_link:
+            # Create or update platform profile link
+            if platform_profile_link:
+                platform_profile_link.url = platform_link
+                platform_profile_link.save()
+            else:
+                ContentLink.objects.create(
+                    platform_progress=platform,
+                    title='Platform Profile',
+                    url=platform_link
+                )
+        else:
+            # Delete platform profile link if empty
+            if platform_profile_link:
+                platform_profile_link.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'completion_percentage': platform.completion_percentage,
+            'draft_percentage': platform.draft_percentage,
+            'message': f'{platform.get_platform_display()} updated successfully'
+        })
+        
+    except ValueError as e:
+        return JsonResponse({'error': 'Please enter valid numbers'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@user_passes_test(is_staff_user)
+@require_POST
+def add_content_link(request):
+    """AJAX endpoint to add a content link to a platform"""
+    try:
+        platform_id = request.POST.get('platform_id')
+        title = request.POST.get('title', '').strip()
+        url = request.POST.get('url', '').strip()
+        
+        if not title or not url:
+            return JsonResponse({'error': 'Title and URL are required'}, status=400)
+        
+        platform = get_object_or_404(ClientPlatformProgress, id=platform_id)
+        content_link = ContentLink.objects.create(
+            platform_progress=platform,
+            title=title,
+            url=url
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'link': {
+                'id': content_link.id,
+                'title': content_link.title,
+                'url': content_link.url
+            },
+            'message': 'Content link added successfully'
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@user_passes_test(is_staff_user)
+@require_POST
+def delete_content_link(request, link_id):
+    """AJAX endpoint to delete a content link"""
+    try:
+        content_link = get_object_or_404(ContentLink, id=link_id)
+        content_link.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Content link deleted successfully'
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@user_passes_test(is_staff_user)
+def brand_quick_update(request, brand_id):
+    """Brand-specific quick update page showing all platforms in a table"""
+    brand = get_object_or_404(BrandProfile, id=brand_id)
+    
+    # Get all platforms for this brand
+    platforms = ClientPlatformProgress.objects.filter(brand=brand).order_by('platform')
+    
+    # Add platform links and content links to each platform
+    for platform in platforms:
+        # Get platform profile link
+        platform_profile = ContentLink.objects.filter(
+            platform_progress=platform, 
+            title='Platform Profile'
+        ).first()
+        platform.platform_link = platform_profile.url if platform_profile else ''
+        
+        # Get other content links (excluding platform profile)
+        platform.other_content_links = ContentLink.objects.filter(
+            platform_progress=platform
+        ).exclude(title='Platform Profile')
+    
+    context = {
+        'brand': brand,
+        'platforms': platforms,
+    }
+    
+    return render(request, 'manager/brand_quick_update.html', context)
