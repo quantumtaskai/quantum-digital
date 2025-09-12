@@ -395,8 +395,8 @@ def update_platform_progress(request):
         # Validation
         if drafted > committed:
             return JsonResponse({'error': 'Drafted cannot be more than committed'}, status=400)
-        if published > drafted:
-            return JsonResponse({'error': 'Published cannot be more than drafted'}, status=400)
+        if published > committed:
+            return JsonResponse({'error': 'Published cannot be more than committed'}, status=400)
         
         platform = get_object_or_404(ClientPlatformProgress, id=platform_id)
         platform.committed = committed

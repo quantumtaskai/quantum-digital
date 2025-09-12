@@ -36,6 +36,11 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 if 'digital.quantumtaskai.com' not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append('digital.quantumtaskai.com')
 
+# Add server IP for direct access (controlled)
+SERVER_IP = os.getenv('SERVER_IP', '31.97.62.205')
+if SERVER_IP not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(SERVER_IP)
+
 # Add CapRover support
 if os.getenv('CAPROVER_GIT_COMMIT_SHA'):
     # Running on CapRover - trust all hosts for now, restrict in production
@@ -269,6 +274,11 @@ LOGGING = {
         'django.request': {
             'handlers': ['console'],
             'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security.DisallowedHost': {
+            'handlers': ['console'],
+            'level': 'CRITICAL',  # Only log critical DisallowedHost errors
             'propagate': False,
         },
     },
