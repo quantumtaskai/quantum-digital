@@ -25,4 +25,6 @@ urlpatterns = [
     path('content-link/<int:link_id>/delete/', views.delete_content_link, name='delete_content_link'),
     # Brand quick update page
     path('brand/<int:brand_id>/quick-update/', views.brand_quick_update, name='brand_quick_update'),
+    # Quick brand creation
+    path('quick-brand-create/', views.quick_brand_create, name='quick_brand_create'),
 ]

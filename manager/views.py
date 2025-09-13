@@ -113,46 +113,92 @@ def generate_folder_structure(request, brand_id=None):
             clean_brand_name = brand.brand_name.replace(' ', '_').replace('/', '_')
             brand_folder = f"{clean_brand_name}/"
             
-            # Create folder structure
+            # Create simplified folder structure - only 3 main folders
             folders = [
                 f"{brand_folder}Client Docs/",
                 f"{brand_folder}Images/",
                 f"{brand_folder}Videos/",
-                f"{brand_folder}00_Brand_voice_guidelines_{clean_brand_name}/",
-                f"{brand_folder}00_Digital Marketing {brand.brand_name}/",
-                f"{brand_folder}00_Social_Media_Templates_{clean_brand_name}/",
-                f"{brand_folder}01_Blogs_{clean_brand_name}/",
-                f"{brand_folder}02_Website_Downloadable_{clean_brand_name}/",
-                f"{brand_folder}03_Google_Business_{clean_brand_name}/",
-                f"{brand_folder}04_LinkedIn_{clean_brand_name}/",
-                f"{brand_folder}07_Instagram_{clean_brand_name}/",
-                f"{brand_folder}08_Pinterest_{clean_brand_name}/",
-                f"{brand_folder}09_X_Twitter_{clean_brand_name}/",
-                f"{brand_folder}10_Facebook_{clean_brand_name}/",
-                f"{brand_folder}11_Medium_{clean_brand_name}/",
-                f"{brand_folder}12_Threads_{clean_brand_name}/",
             ]
             
             # Add folders to ZIP (create empty directories)
             for folder in folders:
                 zip_file.writestr(folder, '')
+            
+            # Create individual Google Docs for each social platform
+            from dashboard.models import ClientPlatformProgress
+            
+            # Get all available platforms
+            for platform_code, platform_name in ClientPlatformProgress.PLATFORM_CHOICES:
+                # Create a Google Doc file for each platform
+                platform_doc_content = f"""# {brand.brand_name} - {platform_name} Content Strategy
+
+## Platform Overview: {platform_name}
+
+### Content Guidelines for {platform_name}:
+- Platform-specific content strategy
+- Posting frequency and timing
+- Content format requirements
+- Hashtag strategy for this platform
+- Engagement tactics
+- Analytics and KPIs to track
+
+### Content Calendar for {platform_name}:
+[Add your scheduled posts and content plan here]
+
+### Brand Voice for {platform_name}:
+- Tone and style specific to this platform
+- Key messaging points
+- Do's and Don'ts
+
+### Performance Metrics:
+- Track engagement rates
+- Monitor follower growth
+- Analyze post performance
+- ROI measurements
+
+---
+Created by Quantum Digital Manager Dashboard
+This document should be converted to a Google Doc and shared with your team.
+"""
+                
+                # Clean platform name for filename
+                clean_platform_name = platform_name.replace('/', '_').replace(' ', '_')
+                zip_file.writestr(f"{brand_folder}{clean_platform_name}_{clean_brand_name}.txt", platform_doc_content)
                 
             # Add a README file with instructions
-            readme_content = f"""# {brand.brand_name} - Content Folder Structure
+            readme_content = f"""# {brand.brand_name} - Content Management Structure
 
-## Instructions:
+## Quick Setup Instructions:
 1. Upload this entire folder structure to Google Drive
-2. Share the main '{brand.brand_name}' folder with your content team
-3. Use these folders to organize your content by platform
+2. Convert the .txt files to Google Docs for each social platform
+3. Share the main '{brand.brand_name}' folder with your content team
+4. Set appropriate permissions for team collaboration
 
 ## Folder Structure:
-- Client Docs: Important documents and contracts
-- Images: Brand images, logos, graphics
-- Videos: Video content and assets
-- 00_Brand_voice_guidelines: Brand voice and messaging guidelines
-- 00_Digital Marketing: Overall digital marketing strategy
-- 00_Social_Media_Templates: Reusable templates
-- Platform-specific folders (01-12): Organized by platform
+- **Client Docs/**: Important documents, contracts, and brand guidelines
+- **Images/**: Brand assets, logos, graphics, photos for social media
+- **Videos/**: Video content, clips, and multimedia assets
+
+## Platform-Specific Strategy Documents:
+Each .txt file represents a Google Doc for a specific social media platform:
+- Instagram_{clean_brand_name}.txt → Convert to Google Doc
+- LinkedIn_{clean_brand_name}.txt → Convert to Google Doc
+- Facebook_{clean_brand_name}.txt → Convert to Google Doc
+- Twitter_X_{clean_brand_name}.txt → Convert to Google Doc
+- And more for each social platform...
+
+## How to Use:
+1. **Upload to Google Drive**: Upload all files and folders
+2. **Convert to Google Docs**: Right-click each .txt file → "Open with" → "Google Docs" → Save as Google Doc
+3. **Organize Content**: Use the three main folders for your assets
+4. **Plan Strategy**: Use individual platform docs for specific content strategies
+5. **Team Collaboration**: Share folder with appropriate permissions
+
+## Benefits of This Structure:
+- Separate strategy for each social media platform
+- Centralized asset management (Images, Videos, Client Docs)
+- Easy team collaboration through Google Workspace
+- Platform-specific content planning and tracking
 
 Created by Quantum Digital Manager Dashboard
 """
@@ -518,3 +564,35 @@ def brand_quick_update(request, brand_id):
     }
     
     return render(request, 'manager/brand_quick_update.html', context)
+
+
+@user_passes_test(is_staff_user)
+@require_POST
+def quick_brand_create(request):
+    """Quick brand creation using Red Dot Events as template"""
+    try:
+        brand_name = request.POST.get('brand_name', '').strip()
+        
+        if not brand_name:
+            return JsonResponse({'error': 'Brand name is required'}, status=400)
+        
+        # Check if brand name already exists
+        if BrandProfile.objects.filter(brand_name__iexact=brand_name).exists():
+            return JsonResponse({'error': f'Brand "{brand_name}" already exists'}, status=400)
+        
+        # Create brand from Red Dot Events template
+        new_brand = BrandProfile.create_from_red_dot_template(brand_name, request.user)
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Brand "{brand_name}" created successfully with all platforms configured',
+            'brand_id': new_brand.id,
+            'brand_name': new_brand.brand_name,
+            'platform_count': new_brand.platform_progress.count(),
+            'redirect_url': f'/manager/brand/{new_brand.id}/'
+        })
+        
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'Failed to create brand: {str(e)}'}, status=500)

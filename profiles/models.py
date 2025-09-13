@@ -120,6 +120,124 @@ class BrandProfile(models.Model):
             return len(platforms_to_create)
         return 0
 
+    @classmethod
+    def create_from_red_dot_template(cls, brand_name, created_by_user):
+        """Create a new brand using Red Dot Events as template"""
+        from django.contrib.auth.models import User
+        from dashboard.models import ClientPlatformProgress
+        
+        try:
+            # Get Red Dot Events brand as template
+            template_brand = cls.objects.get(brand_name__icontains='red dot events')
+        except cls.DoesNotExist:
+            raise ValueError("Red Dot Events template brand not found")
+        
+        # Create username from brand name
+        username = brand_name.lower().replace(' ', '_').replace('-', '_')
+        # Ensure username is unique
+        counter = 1
+        original_username = username
+        while User.objects.filter(username=username).exists():
+            username = f"{original_username}_{counter}"
+            counter += 1
+        
+        # Create user account for the brand
+        user = User.objects.create_user(
+            username=username,
+            email=f"{username}@example.com",  # Dummy email, can be updated later
+            first_name=template_brand.primary_contact_first_name,
+            last_name=template_brand.primary_contact_last_name,
+        )
+        
+        # Create new brand profile by copying from template
+        new_brand = cls.objects.create(
+            user=user,
+            brand_name=brand_name,
+            
+            # Copy contact information from template
+            primary_contact_first_name=template_brand.primary_contact_first_name,
+            primary_contact_last_name=template_brand.primary_contact_last_name,
+            primary_official_email=template_brand.primary_official_email,
+            primary_phone_number=template_brand.primary_phone_number,
+            
+            # Copy secondary contact if exists
+            secondary_contact_first_name=template_brand.secondary_contact_first_name,
+            secondary_contact_last_name=template_brand.secondary_contact_last_name,
+            secondary_official_email=template_brand.secondary_official_email,
+            secondary_phone_number=template_brand.secondary_phone_number,
+            
+            # Copy brand strategy
+            brand_vision=template_brand.brand_vision,
+            brand_mission=template_brand.brand_mission,
+            brand_core_values=template_brand.brand_core_values,
+            brand_visual_verbal_dna_guidelines=template_brand.brand_visual_verbal_dna_guidelines,
+            brand_website=template_brand.brand_website,
+            brand_presence=template_brand.brand_presence,
+            
+            # Copy KPIs
+            website_traffic_kpis=template_brand.website_traffic_kpis,
+            instagram_reach_kpis=template_brand.instagram_reach_kpis,
+            google_sepr_rank_kpis=template_brand.google_sepr_rank_kpis,
+            review_rating_kpis=template_brand.review_rating_kpis,
+            social_media_posts_per_week_kpis=template_brand.social_media_posts_per_week_kpis,
+            videos_per_week_kpis=template_brand.videos_per_week_kpis,
+            shorts_per_week_kpis=template_brand.shorts_per_week_kpis,
+            
+            # Copy SWOT analysis
+            strengths=template_brand.strengths,
+            weaknesses=template_brand.weaknesses,
+            opportunities=template_brand.opportunities,
+            threats=template_brand.threats,
+            
+            # Copy social media platforms (will be updated with brand-specific URLs later)
+            instagram=template_brand.instagram,
+            facebook=template_brand.facebook,
+            twitter=template_brand.twitter,
+            linkedin=template_brand.linkedin,
+            tiktok=template_brand.tiktok,
+            youtube=template_brand.youtube,
+            pinterest=template_brand.pinterest,
+            snapchat=template_brand.snapchat,
+            telegram=template_brand.telegram,
+            medium=template_brand.medium,
+            quora=template_brand.quora,
+            reddit=template_brand.reddit,
+            tumblr=template_brand.tumblr,
+            threads=template_brand.threads,
+            bluesky=template_brand.bluesky,
+            whatsapp_business=template_brand.whatsapp_business,
+            website_blogs=template_brand.website_blogs,
+            
+            # Copy business intelligence
+            top_10_partners=template_brand.top_10_partners,
+            top_10_competitors=template_brand.top_10_competitors,
+            additional_notes=f"Created from Red Dot Events template by {created_by_user.username}",
+        )
+        
+        # Copy platform progress records with same committed values
+        template_platforms = ClientPlatformProgress.objects.filter(brand=template_brand)
+        platforms_to_create = []
+        
+        for template_platform in template_platforms:
+            platforms_to_create.append(
+                ClientPlatformProgress(
+                    brand=new_brand,
+                    platform=template_platform.platform,
+                    committed=template_platform.committed,  # Copy exact committed values
+                    drafted=0,  # Start fresh
+                    published=0,  # Start fresh
+                    notes=f"Committed values copied from Red Dot Events template",
+                    is_visible=template_platform.is_visible,
+                    is_active=template_platform.is_active
+                )
+            )
+        
+        # Bulk create all platform records
+        if platforms_to_create:
+            ClientPlatformProgress.objects.bulk_create(platforms_to_create)
+        
+        return new_brand
+
     class Meta:
         verbose_name = "Brand Profile"
         verbose_name_plural = "Brand Profiles"
