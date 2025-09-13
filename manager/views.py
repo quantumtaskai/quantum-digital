@@ -127,8 +127,9 @@ def generate_folder_structure(request, brand_id=None):
             # Create individual Google Docs for each social platform
             from dashboard.models import ClientPlatformProgress
             
-            # Get all available platforms
-            for platform_code, platform_name in ClientPlatformProgress.PLATFORM_CHOICES:
+            # Get all available platforms and enumerate them for numbering
+            platform_choices = list(ClientPlatformProgress.PLATFORM_CHOICES)
+            for idx, (platform_code, platform_name) in enumerate(platform_choices):
                 # Create a Google Doc file for each platform
                 platform_doc_content = f"""# {brand.brand_name} - {platform_name} Content Strategy
 
@@ -161,9 +162,11 @@ Created by Quantum Digital Manager Dashboard
 This document should be converted to a Google Doc and shared with your team.
 """
                 
-                # Clean platform name for filename
+                # Clean platform name for filename and add sequential number
                 clean_platform_name = platform_name.replace('/', '_').replace(' ', '_')
-                zip_file.writestr(f"{brand_folder}{clean_platform_name}_{clean_brand_name}.txt", platform_doc_content)
+                # Use 2-digit zero-padded numbering
+                file_number = f"{idx:02d}"
+                zip_file.writestr(f"{brand_folder}{file_number}_{clean_platform_name}_{clean_brand_name}.txt", platform_doc_content)
                 
             # Add a README file with instructions
             readme_content = f"""# {brand.brand_name} - Content Management Structure
