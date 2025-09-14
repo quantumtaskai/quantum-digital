@@ -56,29 +56,53 @@
 
         /* Enhanced Navigation */
         .navbar-quantum {
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            background: #f8f9fa;
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: 0 4px 20px var(--shadow-color);
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 1rem 0;
             height: var(--nav-height);
         }
 
         .navbar-brand-quantum {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
             text-decoration: none;
-            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
             transition: all 0.3s ease;
         }
 
+        .navbar-brand-quantum img {
+            height: 60px;
+            width: auto;
+        }
+
+        .brand-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #000000;
+            text-shadow: 
+                inset 2px 2px 4px rgba(0, 0, 0, 0.3),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.7),
+                1px 1px 0px #95a5a6,
+                2px 2px 6px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+            transform: perspective(500px) rotateX(15deg);
+            transition: all 0.3s ease;
+        }
+
+        .brand-text:hover {
+            transform: perspective(500px) rotateX(15deg) translateY(-2px);
+            text-shadow: 
+                inset 3px 3px 6px rgba(0, 0, 0, 0.4),
+                inset -3px -3px 6px rgba(255, 255, 255, 0.8),
+                2px 2px 0px #95a5a6,
+                4px 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
         .navbar-brand-quantum:hover {
-            transform: scale(1.05);
-            text-shadow: 0 0 40px rgba(0, 212, 255, 0.8);
+            transform: scale(1.02);
         }
 
         .nav-link-quantum {
@@ -271,7 +295,8 @@
     <nav class="navbar navbar-expand-lg navbar-quantum fixed-top">
         <div class="container">
             <a class="navbar-brand-quantum" href="/">
-                ⚡ Quantumtask AI Digital Branding
+                <img src="{% static 'images/logo.png' %}" alt="AI Digital Branding Logo">
+                <span class="brand-text">AI DIGITAL BRANDING</span>
             </a>
             <div class="navbar-nav ms-auto d-flex flex-row gap-2">
                 {% if user.is_authenticated %}
@@ -289,13 +314,6 @@
                             Logout
                         </button>
                     </form>
-                {% else %}
-                    <a class="nav-link-quantum" href="{% url 'account_login' %}">
-                        Login
-                    </a>
-                    <a class="nav-link-quantum" href="{% url 'account_signup' %}">
-                        Sign Up
-                    </a>
                 {% endif %}
             </div>
         </div>

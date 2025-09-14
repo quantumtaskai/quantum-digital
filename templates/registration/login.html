@@ -1,372 +1,257 @@
+<!-- REGISTRATION LOGIN TEMPLATE - UPDATED VERSION -->
 {% extends 'base.html' %}
 {% load socialaccount %}
 {% load static %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Sign in{% endblock %}
 
 {% block extra_css %}
 <style>
+    body {
+        background: #000000;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
     .login-container {
-        min-height: calc(100vh - var(--nav-height));
+        min-height: 100vh;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 2rem 0;
+        padding: 2rem 1rem;
+        background: #000000;
     }
-
-    .login-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: 20px;
-        box-shadow: 0 20px 40px var(--shadow-color);
-        overflow: hidden;
+    
+    .login-form {
         width: 100%;
-        max-width: 450px;
-        backdrop-filter: blur(10px);
+        max-width: 480px;
     }
-
+    
     .login-header {
-        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-        padding: 2.5rem 2rem 2rem 2rem;
         text-align: center;
-        position: relative;
-        overflow: hidden;
+        margin-bottom: 2rem;
     }
 
-    .login-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
-        animation: rotate 10s linear infinite;
-    }
-
-    .login-header h2 {
-        color: var(--text-primary);
-        font-weight: 700;
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-        position: relative;
-        z-index: 1;
-    }
-
-    .login-header p {
-        color: var(--text-secondary);
-        margin: 0;
-        font-size: 1rem;
-        position: relative;
-        z-index: 1;
-    }
-
-    .login-body {
-        padding: 2rem;
-    }
-
-    .form-group-login {
+    .auth-logo {
+        text-align: center;
         margin-bottom: 1.5rem;
-        position: relative;
     }
 
-    .form-label-login {
-        color: var(--text-primary);
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        font-size: 0.95rem;
-        display: block;
+    .auth-logo img {
+        height: 60px;
+        width: auto;
     }
-
-    .form-control-login {
-        background: var(--bg-secondary);
-        border: 2px solid var(--border-color);
-        color: var(--text-primary);
-        border-radius: 12px;
-        padding: 1rem 1.25rem;
-        font-size: 1rem;
-        width: 100%;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-    .form-control-login:focus {
-        background: var(--bg-primary);
-        border-color: var(--accent-primary);
-        outline: none;
-        box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.15), 0 0 20px rgba(0, 212, 255, 0.1);
-        transform: translateY(-1px);
-    }
-
-    .form-control-login:hover {
-        border-color: rgba(0, 212, 255, 0.5);
-    }
-
-    .form-control-login::placeholder {
-        color: var(--text-muted);
-        opacity: 0.8;
-    }
-
-    .error-message {
-        color: var(--accent-danger);
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .btn-login-primary {
-        background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
-        border: none;
-        color: white;
-        padding: 1rem 2rem;
-        font-weight: 600;
-        font-size: 1rem;
-        border-radius: 12px;
-        width: 100%;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .btn-login-primary::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s;
-    }
-
-    .btn-login-primary:hover::before {
-        left: 100%;
-    }
-
-    .btn-login-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
-    }
-
-    .btn-login-secondary {
-        background: none;
-        border: 2px solid var(--border-color);
-        color: var(--text-secondary);
-        padding: 0.75rem 1.5rem;
+    
+    .login-header h1 {
+        color: #ffffff;
+        font-size: 1.5rem;
         font-weight: 500;
-        font-size: 0.95rem;
-        border-radius: 12px;
-        width: 100%;
-        margin-top: 1rem;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-block;
-        text-align: center;
+        margin: 0 0 0.5rem 0;
     }
-
-    .btn-login-secondary:hover {
-        border-color: var(--accent-primary);
-        color: var(--accent-primary);
-        transform: translateY(-1px);
-        text-decoration: none;
+    
+    .login-header p {
+        color: #8e8e93;
+        font-size: 0.9rem;
+        margin: 0;
     }
-
-    .login-footer {
-        text-align: center;
-        padding: 1.5rem 2rem;
-        border-top: 1px solid var(--border-color);
-        background: rgba(26, 31, 58, 0.3);
-    }
-
-    .welcome-icon {
-        font-size: 3rem;
+    
+    .form-group {
         margin-bottom: 1rem;
+    }
+    
+    .form-label {
         display: block;
-        animation: bounce 2s ease-in-out infinite;
+        color: #ffffff;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
     }
-
-    @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.6rem 0.875rem;
+        background: #1c1c1e;
+        border: 1px solid #3a3a3c;
+        border-radius: 6px;
+        color: #ffffff;
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease;
     }
-
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-        40% { transform: translateY(-10px); }
-        60% { transform: translateY(-5px); }
+    
+    .form-input::placeholder {
+        color: #8e8e93;
     }
-
-    /* Social Login Styles */
-    .social-login-section {
-        border-top: 1px solid var(--border-color);
-        padding-top: 1.5rem;
-        margin-top: 1.5rem;
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #007aff;
+    }
+    
+    .login-button {
+        width: 100%;
+        padding: 0.7rem;
+        background: #ffffff;
+        color: #000000;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        margin-bottom: 1rem;
+        transition: background-color 0.2s ease;
+    }
+    
+    .login-button:hover {
+        background: #f2f2f7;
+    }
+    
+    .social-login {
+        padding-top: 0;
+        margin-bottom: 1.5rem;
     }
     
     .social-login-title {
         text-align: center;
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-        position: relative;
-    }
-    
-    .social-login-title::before,
-    .social-login-title::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        width: 40%;
-        height: 1px;
-        background: var(--border-color);
-    }
-    
-    .social-login-title::before {
-        left: 0;
-    }
-    
-    .social-login-title::after {
-        right: 0;
+        color: #8e8e93;
+        font-size: 0.8rem;
+        margin: 1rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     .social-buttons {
         display: flex;
         flex-direction: column;
         gap: 0.75rem;
+        margin-bottom: 1rem;
     }
     
-    .social-btn {
+    .social-button {
+        display: block;
+        text-decoration: none;
+        transition: transform 0.2s ease;
+    }
+    
+    .social-button:hover {
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+    
+    .social-button img {
+        width: auto;
+        height: 46px;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .btn-google {
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 0.75rem;
-        padding: 0.875rem 1rem;
-        border: 2px solid var(--border-color);
-        border-radius: 12px;
-        background: var(--bg-secondary);
-        color: var(--text-primary);
-        text-decoration: none;
-        font-weight: 500;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .social-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
         width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-        transition: left 0.5s;
+        padding: 0.875rem 1rem;
+        background: white;
+        color: #374151;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 1rem;
     }
     
-    .social-btn:hover::before {
-        left: 100%;
-    }
-    
-    .social-btn:hover {
+    .btn-google:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+        text-decoration: none;
+        color: #374151;
         transform: translateY(-1px);
-        text-decoration: none;
-        color: var(--text-primary);
-        box-shadow: 0 5px 15px var(--shadow-color);
-    }
-    
-    .social-btn-google {
-        border-color: #dd4b39;
-    }
-    
-    .social-btn-google:hover {
-        border-color: #dd4b39;
-        background: rgba(221, 75, 57, 0.1);
-    }
-    
-    .social-btn-facebook {
-        border-color: #3b5998;
-    }
-    
-    .social-btn-facebook:hover {
-        border-color: #3b5998;
-        background: rgba(59, 89, 152, 0.1);
-    }
-    
-    .social-btn-github {
-        border-color: #333;
-    }
-    
-    .social-btn-github:hover {
-        border-color: #333;
-        background: rgba(51, 51, 51, 0.1);
-    }
-    
-    .social-btn-linkedin {
-        border-color: #0077b5;
-    }
-    
-    .social-btn-linkedin:hover {
-        border-color: #0077b5;
-        background: rgba(0, 119, 181, 0.1);
-    }
-    
-    .social-icon {
-        font-size: 1.25rem;
-        width: 20px;
-        text-align: center;
-    }
-    
-    .google-signin-btn {
-        display: block;
-        text-decoration: none;
-        text-align: center;
-        margin: 0 auto;
-        width: fit-content;
-    }
-    
-    .google-signin-btn:hover {
-        text-decoration: none;
-    }
-    
-    .google-signin-btn img {
-        display: block;
-        margin: 0 auto;
-    }
-    
-    .google-signin-btn img:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    @media (max-width: 768px) {
+    .divider {
+        text-align: center;
+        margin: 1rem 0;
+        position: relative;
+        color: #8e8e93;
+        font-size: 0.875rem;
+    }
+
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #3a3a3c;
+        z-index: 1;
+    }
+
+    .divider span {
+        background: #000000;
+        padding: 0 1rem;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .error-message {
+        color: #ff453a;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+    
+    .signup-link {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #3a3a3c;
+    }
+    
+    .signup-link p {
+        color: #8e8e93;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .signup-link a {
+        color: #007aff;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .signup-link a:hover {
+        text-decoration: underline;
+    }
+
+    .forgot-password {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .forgot-password a {
+        color: #007aff;
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+    
+    .forgot-password a:hover {
+        text-decoration: underline;
+    }
+    
+    @media (max-width: 480px) {
         .login-container {
             padding: 1rem;
         }
-
-        .login-header {
-            padding: 2rem 1.5rem 1.5rem 1.5rem;
-        }
-
-        .login-header h2 {
-            font-size: 1.7rem;
-        }
-
-        .login-body {
-            padding: 1.5rem;
-        }
         
-        .social-buttons {
-            gap: 0.5rem;
-        }
-        
-        .social-btn {
-            padding: 0.75rem;
-            font-size: 0.9rem;
+        .login-form {
+            max-width: 100%;
+            margin: 0 1rem;
         }
     }
 </style>
@@ -374,90 +259,83 @@
 
 {% block content %}
 <div class="login-container">
-    <div class="login-card">
-        <div class="login-header">
-            <span class="welcome-icon">🔐</span>
-            <h2>Welcome Back</h2>
-            <p>Sign in to your account</p>
+    <div class="login-form">
+        <div class="auth-logo">
+            <img src="{% static 'images/logo.png' %}" alt="AI Digital Branding Logo">
         </div>
         
-        <div class="login-body">
-            <form method="post" novalidate>
-                {% csrf_token %}
-                
-                <div class="form-group-login">
-                    <label for="{{ form.username.id_for_label }}" class="form-label-login">Email</label>
-                    <input type="email" 
-                           id="{{ form.username.id_for_label }}" 
-                           name="{{ form.username.name }}"
-                           class="form-control-login" 
-                           placeholder="Enter your email"
-                           value="{{ form.username.value|default:'' }}"
-                           required>
-                    {% if form.username.errors %}
-                        <div class="error-message">
-                            <span>⚠️</span>
-                            <span>{{ form.username.errors.0 }}</span>
-                        </div>
-                    {% endif %}
-                </div>
+        <div class="login-header">
+            <h1>AI Digital Branding</h1>
+            <p>Sign in to continue</p>
+        </div>
+        
+        <!-- Google OAuth First -->
+        {% get_providers as socialaccount_providers %}
+        {% for provider in socialaccount_providers %}
+            {% if provider.id == "google" %}
+                <a href="{% provider_login_url 'google' %}" class="btn-google">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continue with Google
+                </a>
+            {% endif %}
+        {% endfor %}
 
-                <div class="form-group-login">
-                    <label for="{{ form.password.id_for_label }}" class="form-label-login">Password</label>
-                    <input type="password" 
-                           id="{{ form.password.id_for_label }}" 
-                           name="{{ form.password.name }}"
-                           class="form-control-login" 
-                           placeholder="Enter your password"
-                           required>
-                    {% if form.password.errors %}
-                        <div class="error-message">
-                            <span>⚠️</span>
-                            <span>{{ form.password.errors.0 }}</span>
-                        </div>
-                    {% endif %}
-                </div>
-
-                <button type="submit" class="btn-login-primary">
-                    Sign In
-                </button>
-            </form>
-            
-            <!-- Social Login Section -->
-            <div class="social-login-section">
-                <div class="social-login-title">or continue with</div>
-                <div class="social-buttons">
-                    {% get_providers as socialaccount_providers %}
-                    {% for provider in socialaccount_providers %}
-                        {% if provider.id == "google" %}
-                            <a href="{% provider_login_url 'google' %}" class="google-signin-btn">
-                                <img src="{% static 'images/social-icons/light/web_light_rd_ctn.svg' %}" alt="Continue with Google" style="height: 36px; width: auto; border-radius: 6px; transition: all 0.2s ease;">
-                            </a>
-                        {% elif provider.id == "facebook" %}
-                            <a href="{% provider_login_url 'facebook' %}" class="social-btn social-btn-facebook">
-                                <span class="social-icon">📘</span>
-                                <span>Continue with Facebook</span>
-                            </a>
-                        {% elif provider.id == "github" %}
-                            <a href="{% provider_login_url 'github' %}" class="social-btn social-btn-github">
-                                <span class="social-icon">🐙</span>
-                                <span>Continue with GitHub</span>
-                            </a>
-                        {% elif provider.id == "linkedin_oauth2" %}
-                            <a href="{% provider_login_url 'linkedin_oauth2' %}" class="social-btn social-btn-linkedin">
-                                <span class="social-icon">💼</span>
-                                <span>Continue with LinkedIn</span>
-                            </a>
-                        {% endif %}
-                    {% endfor %}
-                </div>
+        {% if socialaccount_providers %}
+            <div class="divider">
+                <span>OR</span>
             </div>
+        {% endif %}
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="id_username" class="form-label">Email</label>
+                <input type="email" 
+                       id="id_username" 
+                       name="username" 
+                       class="form-input"
+                       placeholder="you@example.com"
+                       value="{{ form.username.value|default:'' }}"
+                       required>
+                {% if form.username.errors %}
+                    <div class="error-message">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password" class="form-label">Password</label>
+                <input type="password" 
+                       id="id_password" 
+                       name="password" 
+                       class="form-input"
+                       placeholder="••••••••"
+                       required>
+                {% if form.password.errors %}
+                    <div class="error-message">{{ form.password.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            {% if form.non_field_errors %}
+                <div class="error-message" style="margin-bottom: 1rem;">
+                    {{ form.non_field_errors.0 }}
+                </div>
+            {% endif %}
+            
+            <button type="submit" class="login-button">Sign In</button>
+        </form>
+        
+        <div class="forgot-password">
+            <a href="{% url 'account_reset_password' %}">Forgot password?</a>
         </div>
 
-        <div class="login-footer">
-            <a href="{% url 'account_signup' %}" class="btn-login-secondary">
-                Don't have an account? Create one
-            </a>
+        <div class="signup-link">
+            <p>Need an account? <a href="{% url 'account_signup' %}">Sign up</a></p>
         </div>
     </div>
 </div>

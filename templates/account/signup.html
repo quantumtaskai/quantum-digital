@@ -16,16 +16,22 @@
     .signup-container {
         min-height: 100vh;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 2rem 1rem;
+        padding: 0;
         background: #000000;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
     }
     
     .signup-form {
         width: 100%;
-        max-width: 480px;
+        max-width: 400px;
+        margin: 0;
+        padding: 2rem 1rem;
     }
     
     .signup-header {
@@ -96,44 +102,6 @@
         background: #f2f2f7;
     }
     
-    .social-login {
-        padding-top: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .social-login-title {
-        text-align: center;
-        color: #8e8e93;
-        font-size: 0.8rem;
-        margin-bottom: 1rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .social-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    
-    .social-button {
-        display: block;
-        text-decoration: none;
-        transition: transform 0.2s ease;
-    }
-    
-    .social-button:hover {
-        transform: translateY(-1px);
-        text-decoration: none;
-    }
-    
-    .social-button img {
-        width: auto;
-        height: 46px;
-        display: block;
-        margin: 0 auto;
-    }
-    
     .error-message {
         color: #ff453a;
         font-size: 0.8rem;
@@ -153,10 +121,9 @@
     }
     
     .login-link {
-        text-align: center;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #3a3a3c;
+        text-align: right;
+        margin-top: 0.25rem;
+        padding-top: 0;
     }
     
     .login-link p {
@@ -251,38 +218,6 @@
             
             <button type="submit" class="signup-button">Create Account</button>
         </form>
-        
-        <!-- Social Login -->
-        {% get_providers as socialaccount_providers %}
-        {% if socialaccount_providers %}
-        <div class="social-login">
-            <div class="social-login-title">Or sign up with</div>
-            <div class="social-buttons">
-                {% for provider in socialaccount_providers %}
-                    {% if provider.id == "google" %}
-                        <a href="{% provider_login_url 'google' %}" class="social-button">
-                            <img src="{% static 'images/google/web_light_rd_SU.svg' %}" alt="Sign up with Google">
-                        </a>
-                    {% elif provider.id == "facebook" %}
-                        <a href="{% provider_login_url 'facebook' %}" class="social-button">
-                            <span style="color: #1877f2; margin-right: 0.75rem;">📘</span>
-                            <span>Sign up with Facebook</span>
-                        </a>
-                    {% elif provider.id == "github" %}
-                        <a href="{% provider_login_url 'github' %}" class="social-button">
-                            <span style="color: #333; margin-right: 0.75rem;">🐙</span>
-                            <span>Sign up with GitHub</span>
-                        </a>
-                    {% elif provider.id == "linkedin_oauth2" %}
-                        <a href="{% provider_login_url 'linkedin_oauth2' %}" class="social-button">
-                            <span style="color: #0077b5; margin-right: 0.75rem;">💼</span>
-                            <span>Sign up with LinkedIn</span>
-                        </a>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
         
         <div class="login-link">
             <p>Already have an account? <a href="{% url 'account_login' %}">Sign in</a></p>
