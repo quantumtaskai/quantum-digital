@@ -56,3 +56,8 @@ backups/
 *.sql.gz
 *.dump
 *.backup
+
+# Data exports (may contain secrets)
+*backup*.json
+neon_*.json
+data_export*.json
