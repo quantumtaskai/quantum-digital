@@ -11,44 +11,63 @@ def fix_site_id(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     
     try:
-        # First, remove any default example.com sites that Django creates automatically
-        Site.objects.using(db_alias).filter(domain='example.com').delete()
+        # Strategy: Work with what exists, don't create conflicts
         
-        # Check if production site already exists
+        # Check what site currently has ID=1
+        site_1_exists = False
         try:
-            prod_site = Site.objects.using(db_alias).get(domain='digital.quantumtaskai.com')
-            if prod_site.id == 1:
-                # Already correct, just ensure name is right
-                prod_site.name = 'Quantum Digital'
-                prod_site.save(update_fields=['name'])
+            site_1 = Site.objects.using(db_alias).get(id=1)
+            site_1_exists = True
+            
+            # If ID=1 is already our production domain, we're good
+            if site_1.domain == 'digital.quantumtaskai.com':
+                site_1.name = 'Quantum Digital'
+                site_1.save(update_fields=['name'])
+                return  # All done!
+            
+            # If ID=1 has a different domain, update it to our production domain
             else:
-                # Wrong ID, need to fix
+                site_1.domain = 'digital.quantumtaskai.com'
+                site_1.name = 'Quantum Digital'
+                site_1.save(update_fields=['domain', 'name'])
+                
+                # Remove any duplicate production sites with different IDs
+                Site.objects.using(db_alias).filter(
+                    domain='digital.quantumtaskai.com'
+                ).exclude(id=1).delete()
+                return  # All done!
+                
+        except Site.DoesNotExist:
+            site_1_exists = False
+        
+        # If no site with ID=1 exists, check if production site exists elsewhere
+        if not site_1_exists:
+            try:
+                prod_site = Site.objects.using(db_alias).get(domain='digital.quantumtaskai.com')
+                # Production site exists but with wrong ID - delete and recreate with ID=1
                 prod_site.delete()
                 Site.objects.using(db_alias).create(
                     id=1,
                     domain='digital.quantumtaskai.com',
                     name='Quantum Digital'
                 )
-        except Site.DoesNotExist:
-            # No production site exists, create it with ID=1
-            Site.objects.using(db_alias).create(
-                id=1,
-                domain='digital.quantumtaskai.com',
-                name='Quantum Digital'
-            )
+            except Site.DoesNotExist:
+                # No production site exists at all - create it with ID=1
+                Site.objects.using(db_alias).create(
+                    id=1,
+                    domain='digital.quantumtaskai.com',
+                    name='Quantum Digital'
+                )
         
-        # Final check: if there's somehow still a site with wrong ID=1, fix it
-        try:
-            site_1 = Site.objects.using(db_alias).get(id=1)
-            if site_1.domain != 'digital.quantumtaskai.com':
-                site_1.domain = 'digital.quantumtaskai.com'
-                site_1.name = 'Quantum Digital'
-                site_1.save()
-        except Site.DoesNotExist:
-            pass
+        # Clean up any remaining example.com sites
+        Site.objects.using(db_alias).filter(domain='example.com').delete()
         
-    except Exception:
+    except Exception as e:
         # If anything fails, continue silently to avoid breaking migrations
+        # Log the error if we have logging available
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Site ID fix migration encountered error: {e}")
         pass
 
 
