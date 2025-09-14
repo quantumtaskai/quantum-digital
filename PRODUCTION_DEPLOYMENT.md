@@ -23,7 +23,7 @@
 #### Step 1: Deploy Application
 1. Update Dokploy application environment variables
 2. Deploy/redeploy the application
-3. Migrations will run automatically
+3. Migrations will run automatically (including Site setup migration)
 
 #### Step 2: Setup Production Environment
 After deployment, run this command in Dokploy terminal:
@@ -51,7 +51,7 @@ This will:
 ### Troubleshooting
 
 #### Issue: "duplicate key value violates unique constraint"
-**Solution**: Run the setup_production command first:
+**Solution**: This should be resolved automatically by migration `0007_ensure_site_setup`. If it still occurs, run:
 ```bash
 python manage.py setup_production
 ```
