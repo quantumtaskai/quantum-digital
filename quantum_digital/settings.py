@@ -219,7 +219,18 @@ SOCIALACCOUNT_QUERY_EMAIL = True
 # Redirect after social login
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# Social provider settings
+# Social provider settings  
+# Force django-allauth to ignore placeholder environment variables
+# and use database credentials from SocialApp model instead
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_OAUTH2_CLIENT_ID', '')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET', '')
+
+# Only use environment variables if they contain real credentials (not placeholders)
+USE_ENV_OAUTH = (GOOGLE_CLIENT_ID and 
+                not GOOGLE_CLIENT_ID.startswith('your-') and 
+                GOOGLE_CLIENT_SECRET and 
+                not GOOGLE_CLIENT_SECRET.startswith('your-'))
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
@@ -230,6 +241,12 @@ SOCIALACCOUNT_PROVIDERS = {
             'access_type': 'online',
         },
         'OAUTH_PKCE_ENABLED': True,
+        # Only set APP config if we have real environment credentials
+        # Otherwise django-allauth will use SocialApp model from database
+        **({'APP': {
+            'client_id': GOOGLE_CLIENT_ID,
+            'secret': GOOGLE_CLIENT_SECRET,
+        }} if USE_ENV_OAUTH else {})
     },
 }
 
