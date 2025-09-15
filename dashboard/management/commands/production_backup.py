@@ -30,7 +30,7 @@ class Command(BaseCommand):
         This works in environments where pg_dump is not available
         """
         timestamp = timezone.now().strftime('%Y%m%d_%H%M%S')
-        backup_filename = f'production_backup_{timestamp}.json'
+        backup_filename = f'quantum_digital_backup_{timestamp}.json'
         
         self.stdout.write('🔄 Starting production database backup...')
         
@@ -74,6 +74,12 @@ class Command(BaseCommand):
             self.stdout.write('🔄 RESTORE INSTRUCTIONS:')
             self.stdout.write(f'  python manage.py loaddata {backup_filename}')
             self.stdout.write('')
+            self.stdout.write('📝 BACKUP CONTAINS:')
+            self.stdout.write('  - All Quantum Digital brand profiles')
+            self.stdout.write('  - Platform progress data')
+            self.stdout.write('  - User accounts and authentication')
+            self.stdout.write('  - Site configuration and OAuth settings')
+            self.stdout.write('')
             
         except Exception as e:
             error_msg = f'Production backup failed: {e}'
@@ -89,7 +95,7 @@ class Command(BaseCommand):
         import time
         
         # Find all backup files
-        backup_files = glob.glob('production_backup_*.json')
+        backup_files = glob.glob('quantum_digital_backup_*.json')
         current_time = time.time()
         removed_count = 0
         
