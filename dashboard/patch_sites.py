@@ -14,7 +14,13 @@ _original_save = Site.save
 def patched_save(self, *args, **kwargs):
     """
     Patched save method that handles duplicate domain conflicts gracefully
+    Only active outside of migrations to avoid interference
     """
+    # Skip patch during migrations to avoid interference
+    import sys
+    if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
+        return _original_save(self, *args, **kwargs)
+    
     try:
         return _original_save(self, *args, **kwargs)
     except IntegrityError as e:
