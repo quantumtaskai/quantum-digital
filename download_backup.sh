@@ -11,6 +11,12 @@ LOCAL_BACKUP_DIR="/mnt/sdd2/projects_db_backup/quantum_digital"
 # Create local backup directory if it doesn't exist
 mkdir -p "$LOCAL_BACKUP_DIR"
 
+# Function to cleanup old local backups (keep 7 days)
+cleanup_local_backups() {
+    echo "🧹 Cleaning up local backups older than 7 days..."
+    find "$LOCAL_BACKUP_DIR" -name "quantum_digital_backup_*.json" -type f -mtime +7 -exec rm -f {} \; -exec echo "  Removed: {}" \;
+}
+
 echo "🔄 Quantum Digital Backup Download Tool"
 echo "========================================"
 
@@ -35,6 +41,9 @@ case "${1:-latest}" in
         echo "📊 File info:"
         ls -lh "$LOCAL_BACKUP_DIR/$BACKUP_FILE"
         echo "📁 Saved to: $LOCAL_BACKUP_DIR/$BACKUP_FILE"
+        
+        # Cleanup old local backups
+        cleanup_local_backups
         ;;
         
     "all")
@@ -45,6 +54,9 @@ case "${1:-latest}" in
         
         echo "✅ Downloaded backups:"
         ls -lh "$LOCAL_BACKUP_DIR"/quantum_digital_backup_*.json 2>/dev/null || echo "No backup files found"
+        
+        # Cleanup old local backups
+        cleanup_local_backups
         ;;
         
     *)

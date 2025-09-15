@@ -21,3 +21,7 @@ scp $SERVER:"$LATEST_BACKUP" "$BACKUP_DIR/"
 
 echo "✅ Backup downloaded to: $BACKUP_DIR/$(basename $LATEST_BACKUP)"
 ls -lh "$BACKUP_DIR"/$(basename $LATEST_BACKUP)
+
+# Cleanup old backups (keep 7 days)
+echo "🧹 Cleaning up backups older than 7 days..."
+find "$BACKUP_DIR" -name "quantum_digital_backup_*.json" -type f -mtime +7 -exec rm -f {} \; -exec echo "  Removed: {}" \;

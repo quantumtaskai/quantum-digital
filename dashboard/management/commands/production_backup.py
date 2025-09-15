@@ -20,8 +20,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '--days',
             type=int,
-            default=30,
-            help='Number of days to keep backups (default: 30)'
+            default=7,
+            help='Number of days to keep backups (default: 7)'
         )
 
     def handle(self, *args, **options):
