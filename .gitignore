@@ -50,7 +50,7 @@ Thumbs.db
 # Render
 .render/
 
-# Backups
+# Backups and databases
 backups/
 *.sql
 *.sql.gz
@@ -60,8 +60,13 @@ backups/
 # Data exports (may contain secrets)
 *backup*.json
 neon_*.json
-data_export*.json*.sqlite3
+data_export*.json
+*.sqlite3
 *.tar
-backups/
+
+# Temporary scripts
 create_clean_backup.py
 test_oauth_prod.py
+
+# Archive and reference files
+docs/archive/
