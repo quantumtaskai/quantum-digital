@@ -60,4 +60,8 @@ backups/
 # Data exports (may contain secrets)
 *backup*.json
 neon_*.json
-data_export*.json
+data_export*.json*.sqlite3
+*.tar
+backups/
+create_clean_backup.py
+test_oauth_prod.py

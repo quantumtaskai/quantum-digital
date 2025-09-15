@@ -41,10 +41,14 @@ SERVER_IP = os.getenv('SERVER_IP', '31.97.62.205')
 if SERVER_IP not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(SERVER_IP)
 
-# Add CapRover support
+# Add CapRover support - SECURE PRODUCTION CONFIGURATION
 if os.getenv('CAPROVER_GIT_COMMIT_SHA'):
-    # Running on CapRover - trust all hosts for now, restrict in production
-    ALLOWED_HOSTS = ['*']
+    # Running on CapRover - use specific production domains only
+    ALLOWED_HOSTS = [
+        'digital.quantumtaskai.com',
+        'quantumdigitalproject.quantumtaskai.com',  # CapRover subdomain
+        '31.97.62.205',  # Server IP if needed
+    ]
 
 # CSRF Configuration
 CSRF_TRUSTED_ORIGINS = [
@@ -87,6 +91,10 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    
+    # Database Management Tools
+    'dbbackup',
+    'django_extensions',
     
     # Local apps
     'accounts',
@@ -300,3 +308,28 @@ LOGGING = {
         },
     },
 }
+
+# Database Backup Configuration
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location': BASE_DIR / 'backups'}
+
+# Create backups directory if it doesn't exist
+import os
+os.makedirs(BASE_DIR / 'backups', exist_ok=True)
+
+# Backup settings
+DBBACKUP_CLEANUP_KEEP = 30  # Keep 30 days of backups
+DBBACKUP_CLEANUP_KEEP_MEDIA = 30  # Keep 30 days of media backups
+
+# Production backup settings (when DATABASE_URL is set)
+if os.getenv('DATABASE_URL'):
+    # In production, also backup to cloud storage if configured
+    DBBACKUP_CONNECTORS = {
+        'default': {
+            'ENGINE': 'dbbackup.db.postgresql.PgDumpConnector',
+        }
+    }
+    
+# Media backup (if needed)
+DBBACKUP_MEDIA_STORAGE = DBBACKUP_STORAGE
+DBBACKUP_MEDIA_STORAGE_OPTIONS = DBBACKUP_STORAGE_OPTIONS
