@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ brand_name }} - Digital Marketing Dashboard</title>
+    <title>{{ brand_name }} - Digital Branding Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -649,7 +649,7 @@
     <header class="public-header">
         <div class="container">
             <h1>{{ brand_name }}</h1>
-            <p>Digital Marketing Dashboard</p>
+            <p>Digital Branding Dashboard</p>
         </div>
     </header>
 
@@ -666,11 +666,11 @@
                 <div class="metric-title">Active</div>
             </div>
             <div class="metric-item">
-                <div class="metric-number">{{ platform_progress.total_committed|default:1030 }}</div>
+                <div class="metric-number">{{ platform_progress.total_committed|default:0 }}</div>
                 <div class="metric-title">Content Committed</div>
             </div>
             <div class="metric-item">
-                <div class="metric-number">{{ platform_progress.total_drafted|default:109 }}</div>
+                <div class="metric-number">{{ platform_progress.total_drafted|default:0 }}</div>
                 <div class="metric-title">Total Drafted</div>
             </div>
         </div>
@@ -714,15 +714,15 @@
                     <div class="content-metrics">
                         <div class="metrics-row">
                             <div class="metric-large">
-                                <span class="number">{{ platform_progress.total_committed|default:1030 }}</span>
+                                <span class="number">{{ platform_progress.total_committed|default:0 }}</span>
                                 <span class="label">Committed</span>
                             </div>
                             <div class="metric-large">
-                                <span class="number">{{ platform_progress.total_drafted|default:109 }}</span>
+                                <span class="number">{{ platform_progress.total_drafted|default:0 }}</span>
                                 <span class="label">Drafted</span>
                             </div>
                             <div class="metric-large">
-                                <span class="number">{{ platform_progress.completion_rate|default:11 }}%</span>
+                                <span class="number">{{ platform_progress.completion_rate|default:0 }}%</span>
                                 <span class="label">Rate</span>
                             </div>
                         </div>
@@ -850,7 +850,7 @@
     <footer class="footer">
         <div class="container">
             <p>Powered by <a href="https://quantumtaskai.com" class="brand" target="_blank">Quantum Digital</a></p>
-            <p><small>Professional Digital Marketing Solutions</small></p>
+            <p><small>Professional Digital Branding Solutions</small></p>
         </div>
     </footer>
 
