@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # Environment variables (can be overridden in Dokploy UI)
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
+      - GOOGLE_OAUTH2_CLIENT_ID=${GOOGLE_OAUTH2_CLIENT_ID:-}
+      - GOOGLE_OAUTH2_CLIENT_SECRET=${GOOGLE_OAUTH2_CLIENT_SECRET:-}
+
+    # Volumes for persistent data (Dokploy recommended path)
+    volumes:
+      - ../files/staticfiles:/app/staticfiles
+      - ../files/mediafiles:/app/mediafiles
+      - ../files/backups:/app/backups
+
+    # Network configuration (REQUIRED for Dokploy)
+    networks:
+      - dokploy-network
+
+    # Traefik labels for automatic HTTPS and routing (REQUIRED for Dokploy)
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.quantumdigital.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.quantumdigital.entrypoints=websecure"
+      - "traefik.http.routers.quantumdigital.tls.certResolver=letsencrypt"
+      - "traefik.http.services.quantumdigital.loadbalancer.server.port=8000"
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/admin/login/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Restart policy
+    restart: unless-stopped
+
+# External network managed by Dokploy
+networks:
+  dokploy-network:
+    external: true

@@ -2,6 +2,17 @@
 
 A comprehensive Django web application for digital branding and marketing strategy management. This platform provides businesses with personalized dashboards, automated backup systems, and comprehensive brand management tools.
 
+## 📦 Quick Deployment
+
+**Ready for Dokploy deployment!** See [DOKPLOY_DEPLOYMENT.md](DOKPLOY_DEPLOYMENT.md) for complete deployment instructions.
+
+- ✅ Docker & Docker Compose configured
+- ✅ WhiteNoise for static files (no nginx needed)
+- ✅ Gunicorn production server
+- ✅ PostgreSQL ready
+- ✅ Automatic migrations & collectstatic
+- ✅ SSL/HTTPS via Traefik
+
 ## 🚀 Features
 
 ### 🔐 Authentication & User Flow
