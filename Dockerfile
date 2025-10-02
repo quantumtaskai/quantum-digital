@@ -32,7 +32,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # Install system dependencies for production
 RUN apt-get update && apt-get install -y \
-    libpq5 \
+    libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
@@ -65,7 +66,7 @@ EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000', timeout=10)"
+    CMD curl -f http://localhost:8000/ || exit 1
 
 # Start server
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120", "quantum_digital.wsgi:application"]

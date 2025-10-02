@@ -30,56 +30,26 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-g0q+td8p$jx%(4*s-$7^0(sqzg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-
-# Add production domain
-if 'digital.quantumtaskai.com' not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append('digital.quantumtaskai.com')
-
-# Add server IP for direct access (controlled)
-SERVER_IP = os.getenv('SERVER_IP', '31.97.62.205')
-if SERVER_IP not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(SERVER_IP)
-
-# Add Dokploy wildcard domains
-ALLOWED_HOSTS.extend([
-    '.dokploy.site',
-    '*.dokploy.site',
-    'quantum-digital.dokploy.site',
-])
-
-# Add CapRover support - SECURE PRODUCTION CONFIGURATION
-if os.getenv('CAPROVER_GIT_COMMIT_SHA'):
-    # Running on CapRover - use specific production domains only
-    ALLOWED_HOSTS = [
-        'digital.quantumtaskai.com',
-        'quantumdigitalproject.quantumtaskai.com',  # CapRover subdomain
-        '31.97.62.205',  # Server IP if needed
-    ]
+ALLOWED_HOSTS_str = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1')
+ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_str.split(',')]
 
 # CSRF Configuration
-CSRF_TRUSTED_ORIGINS = [
-    'https://digital.quantumtaskai.com',
-    'https://quantum-digital.dokploy.site',
-    'http://quantum-digital.dokploy.site',
-]
+CSRF_TRUSTED_ORIGINS_str = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_str.split(',') if origin.strip()]
 
 # Tell Django to trust reverse proxy headers (Traefik/Dokploy terminates SSL)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
-USE_X_FORWARDED_PORT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+
+# In production (when DEBUG is False), these should be True
+is_prod = not DEBUG
+SESSION_COOKIE_SECURE = is_prod
+CSRF_COOKIE_SECURE = is_prod
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Ensure allauth builds https URLs for redirects (e.g., Google callback)
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
-
-# Add dynamic CSRF support for CapRover
-if os.getenv('CAPROVER_FRONTEND_ADDR'):
-    CSRF_TRUSTED_ORIGINS.extend([
-        f"https://{os.getenv('CAPROVER_FRONTEND_ADDR')}",
-        f"http://{os.getenv('CAPROVER_FRONTEND_ADDR')}"
-    ])
 
 
 # Application definition
@@ -112,7 +82,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -148,7 +117,10 @@ WSGI_APPLICATION = 'quantum_digital.wsgi.application'
 
 if os.getenv('DATABASE_URL'):
     DATABASES = {
-        'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
+        'default': dj_database_url.parse(
+            os.getenv('DATABASE_URL'),
+            conn_max_age=600  # Enable persistent connections for 10 minutes
+        )
     }
 else:
     DATABASES = {
@@ -196,9 +168,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Whitenoise configuration
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'

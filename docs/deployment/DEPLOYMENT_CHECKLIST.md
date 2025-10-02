@@ -1,6 +1,6 @@
 # Dokploy Deployment Checklist
 
-## Pre-Deployment Checklist
+## 1. Pre-Deployment: Environment Configuration
 
 ### 1. Environment Variables ✓
 - [ ] `SECRET_KEY` set in Dokploy environment
@@ -8,34 +8,85 @@
 - [ ] `DEBUG=False` in production
 - [ ] `ALLOWED_HOSTS` includes `digital.quantumtaskai.com`
 - [ ] Google OAuth credentials configured (if using OAuth)
+- [ ] `CSRF_TRUSTED_ORIGINS` includes `https://digital.quantumtaskai.com,https://quantum-digital.dokploy.site`
 
 ### 2. Database Configuration ✓
 - [ ] PostgreSQL database created
-- [ ] Database accessible on port 5433
+- [ ] `DATABASE_URL` is correctly formatted: `postgresql://user:password@host:port/dbname`
 - [ ] Database credentials tested
-- [ ] Migrations ready to run
-
-### 3. Static Files ✓
-- [ ] `collectstatic` included in docker-compose command
-- [ ] Nginx service configured in docker-compose.yml
-- [ ] Static volume mounts configured
-- [ ] nginx.conf file present and correct
-
-### 4. SSL/HTTPS ✓
-- [ ] Domain DNS pointing to server IP
-- [ ] Dokploy SSL certificate configured
-- [ ] CSRF_TRUSTED_ORIGINS includes https://digital.quantumtaskai.com
-- [ ] SECURE_PROXY_SSL_HEADER configured
 
 ---
 
-## Deployment Steps
+## 2. Deployment: Dokploy `docker-compose.yml`
 
-### Step 1: Push Code to Repository
+Create a new application in Dokploy using Git, and use the following `docker-compose.yml` content. This defines three services:
+1.  `web`: Your Django application, run with Gunicorn.
+2.  `nginx`: A web server to handle incoming traffic and serve static files.
+3.  `migrate`: A one-off job to run database migrations on deployment.
+
+```yaml
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: gunicorn quantum_digital.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    volumes:
+      - static_volume:/app/staticfiles
+    expose:
+      - 8000
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - DATABASE_URL=${DATABASE_URL}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
+      - GOOGLE_OAUTH2_CLIENT_ID=${GOOGLE_OAUTH2_CLIENT_ID}
+      - GOOGLE_OAUTH2_CLIENT_SECRET=${GOOGLE_OAUTH2_CLIENT_SECRET}
+
+  nginx:
+    image: nginx:1.25-alpine
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/app/staticfiles
+    depends_on:
+      - web
+
+  migrate:
+    build: .
+    command: python manage.py migrate --noinput
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+
+volumes:
+  static_volume:
+```
+
+### 3. Create `nginx.conf`
+
+Create a file named `nginx.conf` in the root of your project with this content. It tells Nginx how to route traffic to Django and where to find static files.
+
 ```bash
-git add .
-git commit -m "Fix: Add nginx service and improve static file handling"
-git push origin main
+## nginx.conf
+
+upstream django_server {
+    server web:8000;
+}
+
+server {
+    listen 80;
+
+    location /static/ {
+        alias /app/staticfiles/;
+    }
+
+    location / {
+        proxy_pass http://django_server;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+    }
+}
 ```
 
 ### Step 2: SSH into Dokploy Server

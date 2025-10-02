@@ -35,6 +35,8 @@ In Dockploy, add these environment variables:
 SECRET_KEY=s6z3(uzpvy7!z$&i7@yxtx*)agy1bw@k65ok_6^v2&bs^q3mo6
 DEBUG=False
 ALLOWED_HOSTS=digital.quantumtaskai.com,localhost,127.0.0.1
+SITE_DOMAIN=digital.quantumtaskai.com
+CSRF_TRUSTED_ORIGINS=https://digital.quantumtaskai.com
 
 # Neon Database
 DATABASE_URL=postgresql://neondb_owner:npg_vAPIG7tm1hQB@ep-winter-queen-a17omo4b-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
@@ -54,24 +56,28 @@ LINKEDIN_OAUTH2_CLIENT_SECRET=your-production-linkedin-client-secret
 
 1. **Create New Application**
    - Name: `quantum-digital`
-   - Type: `Docker Compose`
-   - Repository: Your Git repository URL
-   - Branch: `main`
+   - Source: `Git`
+   - Repository: Your Git repository URL, Branch: `main`
 
-2. **Domain Configuration**
+2. **Build Configuration**
+   - Build Type: `Compose`
+   - Compose Location: `/docker-compose.yml`
+
+   > **Note:** You can leave the "Build Command" field empty. Your `Dockerfile` already includes the `python manage.py collectstatic --noinput` command, which is the most efficient way to handle static files by baking them directly into the production image.
+
+3. **Network Configuration**
+   - In the "Network" tab, Dokploy will automatically handle networking for your services. You can leave the "Ports" section empty, as your `docker-compose.yml` already correctly exposes port 80 on the `nginx` service for Dokploy's internal proxy.
+
+3. **Domain Configuration**
    - Primary domain: `digital.quantumtaskai.com`
    - Enable SSL/TLS (Let's Encrypt)
    - Enable automatic certificate renewal
 
-3. **Port Configuration**
-   - Container port: `8000`
-   - Public port: `80/443` (handled by nginx)
-
 ### **Step 4: Deploy**
 
-1. Click **"Deploy"** in Dockploy
-2. Monitor deployment logs
-3. Wait for all services to start
+1. Click **"Save"** to create the application.
+2. Click **"Deploy"** to start the build and deployment process.
+3. Monitor the deployment logs for the `web`, `nginx`, and `migrate` services.
 
 ### **Step 5: Update OAuth Redirect URIs**
 
