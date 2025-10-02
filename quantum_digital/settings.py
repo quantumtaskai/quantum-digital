@@ -298,7 +298,7 @@ LOGGING = {
         },
         'django.request': {
             'handlers': ['console'],
-            'level': 'ERROR',
+            'level': 'WARNING',  # Changed to WARNING to catch 404s
             'propagate': False,
         },
         'django.security.DisallowedHost': {
@@ -306,8 +306,17 @@ LOGGING = {
             'level': 'CRITICAL',  # Only log critical DisallowedHost errors
             'propagate': False,
         },
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
+
+# Ensure static files directory permissions
+import os
+os.makedirs(STATIC_ROOT, exist_ok=True)
 
 # Database Backup Configuration
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'

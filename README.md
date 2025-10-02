@@ -194,14 +194,17 @@ python manage.py show_urls
 ## 🆘 Troubleshooting
 
 ### Common Issues
+- **404 Errors**: See [Quick Fix Guide](QUICK_FIX_404.md) and [Detailed Troubleshooting](docs/deployment/TROUBLESHOOTING_404.md)
 - **Backup Problems**: Check `/mnt/sdd2/projects_db_backup/quantum_digital/backup.log`
 - **Authentication Issues**: Verify OAuth configuration in admin
 - **Database Conflicts**: Run `python manage.py setup_production`
-- **Deployment Failures**: Check container logs and migrations
+- **Deployment Failures**: Check [Deployment Checklist](docs/deployment/DEPLOYMENT_CHECKLIST.md)
 
 ### Support Resources
+- **Quick Fixes**: [QUICK_FIX_404.md](QUICK_FIX_404.md)
 - **Documentation**: `/docs/` directory for detailed guides
-- **Database Guide**: `DATABASE_MANAGEMENT.md`
+- **Database Guide**: [DATABASE_MANAGEMENT.md](DATABASE_MANAGEMENT.md)
+- **Deployment Guide**: [docs/deployment/DEPLOYMENT_CHECKLIST.md](docs/deployment/DEPLOYMENT_CHECKLIST.md)
 - **Backup Tools**: `/mnt/sdd2/projects_db_backup/quantum_digital/`
 
 ## 📊 Current Statistics
