@@ -5,43 +5,50 @@ echo "========================================="
 echo "Quantum Digital - Django Startup Script"
 echo "========================================="
 
-# Wait for database to be ready
-echo "⏳ Waiting for database connection..."
+# Wait for database to be ready (PostgreSQL only)
+echo "⏳ Checking database connection..."
 python << END
 import sys
 import time
-import psycopg2
-from urllib.parse import urlparse
 import os
 
-db_url = os.getenv('DATABASE_URL')
-if db_url:
-    result = urlparse(db_url)
-    max_tries = 30
-    tries = 0
+db_url = os.getenv('DATABASE_URL', '')
 
-    while tries < max_tries:
-        try:
-            conn = psycopg2.connect(
-                database=result.path[1:],
-                user=result.username,
-                password=result.password,
-                host=result.hostname,
-                port=result.port
-            )
-            conn.close()
-            print("✅ Database is ready!")
-            break
-        except psycopg2.OperationalError as e:
-            tries += 1
-            print(f"⏳ Database not ready yet ({tries}/{max_tries})... waiting")
-            time.sleep(2)
+# Only check PostgreSQL connections
+if db_url and db_url.startswith('postgres'):
+    try:
+        import psycopg2
+        from urllib.parse import urlparse
 
-    if tries >= max_tries:
-        print("❌ Could not connect to database after 30 attempts")
-        sys.exit(1)
+        result = urlparse(db_url)
+        max_tries = 30
+        tries = 0
+
+        print("⏳ Waiting for PostgreSQL connection...")
+        while tries < max_tries:
+            try:
+                conn = psycopg2.connect(
+                    database=result.path[1:],
+                    user=result.username,
+                    password=result.password,
+                    host=result.hostname,
+                    port=result.port
+                )
+                conn.close()
+                print("✅ PostgreSQL database is ready!")
+                break
+            except psycopg2.OperationalError as e:
+                tries += 1
+                print(f"⏳ Database not ready yet ({tries}/{max_tries})... waiting")
+                time.sleep(2)
+
+        if tries >= max_tries:
+            print("❌ Could not connect to PostgreSQL after 30 attempts")
+            sys.exit(1)
+    except ImportError:
+        print("⚠️  psycopg2 not available, skipping database check")
 else:
-    print("⚠️  DATABASE_URL not set, using SQLite")
+    print("⚠️  Using SQLite or DATABASE_URL not set")
 END
 
 # Apply database migrations
