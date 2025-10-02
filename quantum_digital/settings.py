@@ -41,6 +41,9 @@ SERVER_IP = os.getenv('SERVER_IP', '31.97.62.205')
 if SERVER_IP not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(SERVER_IP)
 
+# Add wildcard for internal container networking
+ALLOWED_HOSTS.extend(['*'])  # Temporary - allow all hosts to debug issue
+
 # Add CapRover support - SECURE PRODUCTION CONFIGURATION
 if os.getenv('CAPROVER_GIT_COMMIT_SHA'):
     # Running on CapRover - use specific production domains only
@@ -58,11 +61,15 @@ CSRF_TRUSTED_ORIGINS = [
     'http://quantum-digital.69.62.81.168.nip.io',   # CapRover HTTP fallback
 ]
 
-# Tell Django to trust reverse proxy headers (Dockploy terminates SSL)
+# Tell Django to trust reverse proxy headers (Traefik/Dokploy terminates SSL)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+
+# Allow requests with X-Forwarded-Host header
+ALLOWED_HOSTS.append('.dokploy.site')  # Add dokploy internal domains
 
 # Ensure allauth builds https URLs for redirects (e.g., Google callback)
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
