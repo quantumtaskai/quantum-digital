@@ -6,6 +6,7 @@ services:
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
+      - backup_volume:/app/backups
     environment:
       - DEBUG=False
       - ALLOWED_HOSTS=digital.quantumtaskai.com,localhost,127.0.0.1
@@ -45,6 +46,7 @@ volumes:
   static_volume:
   media_volume:
   nginx_logs:
+  backup_volume:
 
 networks:
   app_network:
