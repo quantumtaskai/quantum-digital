@@ -41,9 +41,6 @@ SERVER_IP = os.getenv('SERVER_IP', '31.97.62.205')
 if SERVER_IP not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(SERVER_IP)
 
-# Add wildcard for internal container networking
-ALLOWED_HOSTS.extend(['*'])  # Temporary - allow all hosts to debug issue
-
 # Add CapRover support - SECURE PRODUCTION CONFIGURATION
 if os.getenv('CAPROVER_GIT_COMMIT_SHA'):
     # Running on CapRover - use specific production domains only

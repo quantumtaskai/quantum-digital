@@ -20,7 +20,7 @@ services:
              python manage.py shell -c 'from django.contrib.sites.models import Site; site, created = Site.objects.get_or_create(pk=1); site.domain = \"digital.quantumtaskai.com\"; site.name = \"Quantum Digital\"; site.save(); print(\"Site configured for production\")' &&
              gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 quantum_digital.wsgi:application"
     networks:
-      - app_network
+      - dokploy-network
 
   nginx:
     image: nginx:alpine
@@ -34,7 +34,7 @@ services:
     depends_on:
       - web
     networks:
-      - app_network
+      - dokploy-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nginx.rule=Host(`digital.quantumtaskai.com`)"
@@ -49,5 +49,5 @@ volumes:
   backup_volume:
 
 networks:
-  app_network:
-    driver: bridge
+  dokploy-network:
+    external: true
