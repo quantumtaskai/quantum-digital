@@ -49,7 +49,6 @@ quantum-digital/
 ├── templates/               # HTML templates with modern UI
 ├── static/                  # CSS, JS, images
 ├── docs/                    # Organized documentation
-│   ├── deployment/         # Deployment guides
 │   └── setup/              # Setup instructions
 └── DATABASE_MANAGEMENT.md   # Backup system documentation
 ```
@@ -58,7 +57,6 @@ quantum-digital/
 - **Backend**: Django 5.2.5 with PostgreSQL
 - **Frontend**: HTML5, CSS3, Bootstrap 5, JavaScript
 - **Authentication**: django-allauth with Google OAuth
-- **Deployment**: Dokploy with Docker containerization
 - **Backup**: django-dbbackup with automated scheduling
 - **Tools**: django-extensions for enhanced management
 
@@ -123,25 +121,6 @@ python manage.py loaddata /path/to/quantum_digital_backup_YYYYMMDD_HHMMSS.json
 python manage.py setup_production
 ```
 
-## 🌐 Deployment
-
-### Production Environment (Dokploy)
-- **URL**: https://digital.quantumtaskai.com
-- **Database**: PostgreSQL with automated backups
-- **SSL**: Automatic HTTPS with domain management
-- **Monitoring**: Comprehensive logging and error tracking
-
-### Deployment Commands
-```bash
-# Deploy to production
-git push origin main
-
-# Monitor deployment
-docker logs quantumdigitalproject-quantumdigital-ndmwqy-web-1
-
-# Production backup
-ssh root@31.97.62.205 "docker exec <container> python manage.py production_backup"
-```
 
 ## 👥 User Workflows
 
@@ -194,48 +173,38 @@ python manage.py show_urls
 ## 🆘 Troubleshooting
 
 ### Common Issues
-- **404 Errors**: See [Quick Fix Guide](QUICK_FIX_404.md) and [Detailed Troubleshooting](docs/deployment/TROUBLESHOOTING_404.md)
-- **Backup Problems**: Check `/mnt/sdd2/projects_db_backup/quantum_digital/backup.log`
+- **Backup Problems**: Check backup logs in `/backups/` directory
 - **Authentication Issues**: Verify OAuth configuration in admin
 - **Database Conflicts**: Run `python manage.py setup_production`
-- **Deployment Failures**: Check [Deployment Checklist](docs/deployment/DEPLOYMENT_CHECKLIST.md)
 
 ### Support Resources
-- **Quick Fixes**: [QUICK_FIX_404.md](QUICK_FIX_404.md)
 - **Documentation**: `/docs/` directory for detailed guides
 - **Database Guide**: [DATABASE_MANAGEMENT.md](DATABASE_MANAGEMENT.md)
-- **Deployment Guide**: [docs/deployment/DEPLOYMENT_CHECKLIST.md](docs/deployment/DEPLOYMENT_CHECKLIST.md)
-- **Backup Tools**: `/mnt/sdd2/projects_db_backup/quantum_digital/`
 
 ## 📊 Current Statistics
 - **Users**: 16+ registered users
 - **Brand Profiles**: 10+ active brands
 - **Platform Progress**: 200+ tracking records
-- **Backup System**: 7-day automated retention
-- **Deployment**: Production-ready with monitoring
+- **Backup System**: Automated retention management
 
 ## 🔄 Backup & Maintenance
 
 ### Automated Systems
-- **Server Backups**: Daily at 2:00 AM (7-day retention)
-- **Local Downloads**: Daily at 3:00 AM (automatic sync)
+- **Database Backups**: Automated backup system
 - **Cleanup**: Automated old file removal
 - **Monitoring**: Comprehensive logging and alerts
 
 ### Manual Operations
 ```bash
-# Quick backup download
-/mnt/sdd2/projects_db_backup/quantum_digital/quick_backup.sh
-
-# View backup logs
-tail -f /mnt/sdd2/projects_db_backup/quantum_digital/backup.log
-
-# Production health check
+# Database health check
 python manage.py check --database=default
+
+# Manual backup
+python manage.py production_backup
 ```
 
 ---
 
-**Quantum Digital** - Professional digital branding platform with enterprise-grade backup and deployment systems.
+**Quantum Digital** - Professional digital branding platform with enterprise-grade backup systems.
 
 *Last updated: 2025-09-15 | Version: 2.0 | Production Ready*
