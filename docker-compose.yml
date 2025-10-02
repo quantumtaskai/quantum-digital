@@ -23,9 +23,8 @@ services:
 
   nginx:
     image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
+    expose:
+      - "80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - static_volume:/app/staticfiles:ro
@@ -35,6 +34,12 @@ services:
       - web
     networks:
       - app_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=Host(`digital.quantumtaskai.com`)"
+      - "traefik.http.routers.nginx.entrypoints=websecure"
+      - "traefik.http.routers.nginx.tls.certresolver=letsencrypt"
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
 
 volumes:
   static_volume:
