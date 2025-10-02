@@ -41,6 +41,13 @@ SERVER_IP = os.getenv('SERVER_IP', '31.97.62.205')
 if SERVER_IP not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(SERVER_IP)
 
+# Add Dokploy wildcard domains
+ALLOWED_HOSTS.extend([
+    '.dokploy.site',
+    '*.dokploy.site',
+    'quantum-digital.dokploy.site',
+])
+
 # Add CapRover support - SECURE PRODUCTION CONFIGURATION
 if os.getenv('CAPROVER_GIT_COMMIT_SHA'):
     # Running on CapRover - use specific production domains only
@@ -52,21 +59,18 @@ if os.getenv('CAPROVER_GIT_COMMIT_SHA'):
 
 # CSRF Configuration
 CSRF_TRUSTED_ORIGINS = [
-    'https://digital.quantumtaskai.com',  # Production domain
-    'https://qdb-g66u.onrender.com',  # Render deployment
-    'https://quantum-digital.69.62.81.168.nip.io',  # CapRover deployment
-    'http://quantum-digital.69.62.81.168.nip.io',   # CapRover HTTP fallback
+    'https://digital.quantumtaskai.com',
+    'https://quantum-digital.dokploy.site',
+    'http://quantum-digital.dokploy.site',
 ]
 
 # Tell Django to trust reverse proxy headers (Traefik/Dokploy terminates SSL)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-
-# Allow requests with X-Forwarded-Host header
-ALLOWED_HOSTS.append('.dokploy.site')  # Add dokploy internal domains
+# Disable HTTPS-only cookies for now to allow testing
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 # Ensure allauth builds https URLs for redirects (e.g., Google callback)
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
