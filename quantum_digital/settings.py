@@ -68,9 +68,8 @@ CSRF_TRUSTED_ORIGINS = [
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
-# Disable HTTPS-only cookies for now to allow testing
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # Ensure allauth builds https URLs for redirects (e.g., Google callback)
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
