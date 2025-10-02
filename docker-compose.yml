@@ -17,8 +17,8 @@ services:
       - GOOGLE_OAUTH2_CLIENT_SECRET=${GOOGLE_OAUTH2_CLIENT_SECRET:-}
 
     # Volumes for persistent data (Dokploy recommended path)
+    # Note: staticfiles are served by WhiteNoise from container, don't need persistence
     volumes:
-      - ../files/staticfiles:/app/staticfiles
       - ../files/mediafiles:/app/mediafiles
       - ../files/backups:/app/backups
 

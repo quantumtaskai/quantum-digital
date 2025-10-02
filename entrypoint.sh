@@ -57,7 +57,7 @@ python manage.py migrate --noinput
 
 # Create production site if needed
 echo "🌐 Setting up production site..."
-python manage.py setup_production --noinput || echo "⚠️  setup_production command not found or failed, continuing..."
+python manage.py setup_production || echo "⚠️  setup_production command not found or failed, continuing..."
 
 # Collect static files
 echo "📦 Collecting static files..."
